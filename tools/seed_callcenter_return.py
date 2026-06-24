@@ -143,6 +143,26 @@ def backing_specs(n, used):
     return specs
 
 
+def self_service_specs(n, used):
+    """Branch B: users who reach telco_call_number_tapped, back out, and
+    self-resolve via the support article (path='self_service')."""
+    specs = []
+    for _ in range(n):
+        name = "%s %s" % (random.choice(FIRST_NAMES), random.choice(LAST_NAMES))
+        plat, osvs, oscat, models = DEVICE_BUCKETS[weighted(BUCKET_WEIGHTS)]
+        ten = weighted(TENURE_WEIGHTS)
+        yrs = {"5+ years": random.randint(5, 12), "1-5 years": random.randint(1, 4),
+               "under 1 year": 0}[ten]
+        specs.append(dict(name=name, email=email_for(name, used), platform=plat,
+                          os_version=random.choice(osvs), os_category=oscat,
+                          device_model=random.choice(models), tenure_segment=ten,
+                          tenure_years=yrs, market=weighted(MARKET_WEIGHTS),
+                          day0_days_ago=random.randint(3, 14),
+                          failed_attempts=random.choices([1, 2, 3, 4], weights=[30, 35, 20, 15])[0],
+                          reaches_call=True, returns_pays=False, path="self_service"))
+    return specs
+
+
 def build_journey(spec, now, cohort):
     s = spec
     amount = {"Tokyo": 86.40, "Sydney": 92.10, "Singapore": 86.40}.get(s["market"], 86.40)
@@ -222,11 +242,27 @@ def build_journey(spec, now, cohort):
         emit(5, "telco_call_us_viewed", {"depth": 4})
     if maxstage >= 6:
         emit(4, "telco_call_number_tapped", {"line": line, "depth": 4})
+        if s.get("path") == "self_service":
+            # ── BRANCH B: back out of calling → re-read the article → self-resolve
+            #    → pay in the SAME session (a faster, better outcome than calling).
+            emit(3, "telco_call_abandoned", {"invoice_no": invoice, "line": line, "depth": 4})
+            screen(6, "Telco - Support Article", 3)
+            emit(35, "telco_support_article_viewed",
+                 {"article_id": art, "category": "billing", "depth": 3, "source": "returned_from_call_us"})
+            emit(10, "telco_self_service_resolved",
+                 {"invoice_no": invoice, "article_id": art, "resolution_path": "self_service"})
+            screen(5, "Telco - Bill Payment", 0)
+            emit(6, "telco_bill_payment_started",
+                 {"invoice_no": invoice, "amount": amount, "method": method, "attempt": 1, "return_visit": False})
+            emit(3, "telco_bill_payment_completed",
+                 {"invoice_no": invoice, "amount": amount, "method": method,
+                  "resolved_via": "self_service", "days_since_call": 0})
+            return s["email"], user_props, events
         emit(3, "called_into_call_center",
              {"invoice_no": invoice, "amount": amount, "line": line,
               "wait_minutes": random.choice([12, 18, 24, 31, 47]), "resolved": True})
 
-    # ── Day +2 return: successful payment ────────────────────────────────────
+    # ── Day +2 return: successful payment (call-centre path A) ───────────────
     if s["reaches_call"] and s["returns_pays"]:
         t[0] = t[0] + timedelta(days=2, hours=random.randint(2, 9))
         screen(2, "Telco - Bills", 0)
@@ -267,7 +303,9 @@ def main():
     ap.add_argument("--endpoint", default=DEFAULT_TRACK_ENDPOINT)
     ap.add_argument("--user-props-endpoint", default=DEFAULT_USER_PROPS_ENDPOINT)
     ap.add_argument("--cohort", default="callcenter_return_demo")
-    ap.add_argument("--backing", type=int, default=0, help="number of backing-audience users")
+    ap.add_argument("--backing", type=int, default=0, help="number of backing-audience users (call path)")
+    ap.add_argument("--self-service", type=int, default=0,
+                    help="number of BRANCH-B users (reach call number, back out, self-resolve via article)")
     ap.add_argument("--no-heroes", action="store_true", help="skip the 8 named hero users (avoid re-sending)")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--max-workers", type=int, default=8)
@@ -282,12 +320,20 @@ def main():
     if not args.no_heroes:
         specs += hero_specs(used_emails)
     specs += backing_specs(args.backing, used_emails)
+    if args.self_service:
+        # Reserve already-deployed identities (8 heroes + 500 backing @ seed 2026)
+        # so branch-B users get fresh, non-colliding emails when sent on their own.
+        if "atsushi.okimoto@contentsquare.com" not in used_emails:
+            hero_specs(used_emails)
+            _st = random.getstate(); random.seed(2026)
+            backing_specs(500, used_emails); random.setstate(_st)
+        specs += self_service_specs(args.self_service, used_emails)
     journeys = [build_journey(s, now, args.cohort) for s in specs]
 
     # ── Summary: acquisition + tenure + funnel ──
     total_events = sum(len(ev) for _, _, ev in journeys)
     by_plat, by_bucket, by_tenure = {}, {}, {}
-    called = returned = bills = 0
+    called = returned = bills = self_resolved = abandoned = 0
     for spec, (_id, _u, ev) in zip(specs, journeys):
         by_plat[spec["platform"]] = by_plat.get(spec["platform"], 0) + 1
         bkey = "%s/%s" % (spec["platform"], spec["os_category"])
@@ -297,6 +343,8 @@ def main():
         bills += 1 if "telco_bills_viewed" in names else 0
         called += 1 if "called_into_call_center" in names else 0
         returned += 1 if "telco_bill_payment_completed" in names else 0
+        self_resolved += 1 if "telco_self_service_resolved" in names else 0
+        abandoned += 1 if "telco_call_abandoned" in names else 0
 
     print("\n" + "=" * 64)
     print("  Call-centre return cohort   cohort=%s" % args.cohort)
@@ -312,6 +360,8 @@ def main():
         print("    %-14s %4d" % (k, by_tenure.get(k, 0)))
     print("  FUNNEL — bills_viewed=%d  called_into_call_center=%d  bill_payment_completed=%d"
           % (bills, called, returned))
+    print("  BRANCH B (self-service) — call_abandoned=%d  self_service_resolved=%d"
+          % (abandoned, self_resolved))
     print("=" * 64 + "\n")
 
     if not args.send:

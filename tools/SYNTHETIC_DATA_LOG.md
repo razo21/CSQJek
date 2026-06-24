@@ -70,6 +70,15 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
 - **For:** acquisition-by-device chart + tenure segmentation. Combined with the 8 heroes ≈ **508 users** in the cohort.
 - **Status:** **active.**
 
+### 7. Call-centre return — self-service branch (B) — `callcenter_return_demo`  ⟶ ACTIVE
+- **Date:** 2026-06-24 · **Script:** `seed_callcenter_return.py`
+- **Cmd:** `--self-service 200 --no-heroes --seed 7 --max-workers 8 --send`
+- **Result:** 200 users · 5,321 events · 5,521 requests · ok=5,521 fail=0
+- **Content:** branch-B users who reach `telco_call_number_tapped`, then **back out of calling** → re-read the FAQ (`telco_support_article_viewed`, `source=returned_from_call_us`) → self-resolve → pay **same session**. `--no-heroes`; identities reserved against the deployed 8 heroes + 500 backing (seed 2026) ⇒ **0 collisions**.
+- **New events:** `telco_call_abandoned`, `telco_self_service_resolved`. Payment carries `resolved_via: "self_service"` (vs `call_center` for path A); `days_since_call: 0`.
+- **Fork:** at `telco_call_number_tapped` the cohort splits ~458 call (path A) vs 200 self-serve (path B). Analyze via a journey from `telco_call_number_tapped`, or split a funnel by the `resolved_via` property.
+- **Status:** **active.**
+
 ---
 
 ## How to regenerate (after the dates age out)
