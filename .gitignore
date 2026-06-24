@@ -22,7 +22,11 @@ xcuserdata/
 .build/
 
 # ── Claude Code local config / worktrees (any level) ───
-.claude/
+.claude/*
+# …but track the shared session-start hook so all sessions get the clash check
+!.claude/settings.json
+!.claude/hooks/
+.claude/settings.local.json
 
 # ── Editors / misc ─────────────────────────────────────
 *.swp
