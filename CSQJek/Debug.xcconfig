@@ -1,0 +1,24 @@
+// CSQJek — Debug build overrides for fast simulator iteration
+// Apply in Xcode: Project → Info → Configurations → Debug → set this file
+// These settings ONLY apply to the Debug configuration (simulator builds).
+// They are NOT inherited by Release/Archive.
+
+// Compile only the active CPU architecture (arm64 for Apple Silicon Macs).
+// Prevents unnecessary x86_64 slice compilation on AS Macs.
+ONLY_ACTIVE_ARCH = YES
+
+// Skip dSYM generation for Debug — saves ~3-5s per build on simulator.
+DEBUG_INFORMATION_FORMAT = dwarf
+
+// No whole-module optimization in Debug — incremental builds are much faster.
+SWIFT_OPTIMIZATION_LEVEL = -Onone
+
+// Disable bitcode — not needed for simulator and adds build time.
+ENABLE_BITCODE = NO
+
+// Disable app entitlements validation on simulator.
+CODE_SIGNING_ALLOWED = NO
+
+// Skip unnecessary resource processing on incremental builds.
+COMPRESS_PNG_FILES = NO
+STRIP_PNG_TEXT = NO

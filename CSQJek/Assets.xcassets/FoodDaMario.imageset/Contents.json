@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "FoodDaMario.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

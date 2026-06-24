@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "MartChickenWings.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

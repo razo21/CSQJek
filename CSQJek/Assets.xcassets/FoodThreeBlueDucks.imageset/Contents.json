@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "FoodThreeBlueDucks.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

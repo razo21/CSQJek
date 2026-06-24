@@ -1,0 +1,78 @@
+{
+  "originHash" : "e0eeadbd627276741d3fa8a02404c66c334abcefb33f6d3c4d92f893b20166b2",
+  "pins" : [
+    {
+      "identity" : "apple-interim-bridge-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ContentSquare/apple-interim-bridge-sdk.git",
+      "state" : {
+        "revision" : "951356d990a2c9abd7d6eb10fea4fbb47136b797",
+        "version" : "0.14.0"
+      }
+    },
+    {
+      "identity" : "apple-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ContentSquare/apple-sdk",
+      "state" : {
+        "revision" : "1a2230ec926f948b18976672108490f65c0eae92",
+        "version" : "1.6.2"
+      }
+    },
+    {
+      "identity" : "cs_ios_crashreporter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ContentSquare/CS_iOS_CrashReporter.git",
+      "state" : {
+        "revision" : "9f00d53c3d2c7a0b2d92a694fc9d4c993bb2b157",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "cs_ios_sdk_dynamic",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ContentSquare/CS_iOS_SDK_DYNAMIC.git",
+      "state" : {
+        "revision" : "e7e06ed9403d0a152a9e9e149291fa811493dc52",
+        "version" : "4.46.2"
+      }
+    },
+    {
+      "identity" : "csswiftprotobuf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ContentSquare/CSSwiftProtobuf.git",
+      "state" : {
+        "revision" : "0f26877bd719c45219a3063696d0d1d600a08c48",
+        "version" : "1.33.3"
+      }
+    },
+    {
+      "identity" : "heap-ios-autocapture-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/heap/heap-ios-autocapture-sdk.git",
+      "state" : {
+        "revision" : "585a70dc597a51e3e6d108e6e5446e9f3539ad14",
+        "version" : "0.10.1"
+      }
+    },
+    {
+      "identity" : "heap-notification-autocapture-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/heap/heap-notification-autocapture-sdk.git",
+      "state" : {
+        "revision" : "18c83da0f40f1f0f53084d3291923165cb41ca46",
+        "version" : "0.8.3"
+      }
+    },
+    {
+      "identity" : "heap-swift-core-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/heap/heap-swift-core-sdk.git",
+      "state" : {
+        "revision" : "ad9253b760721c8199b71a6468f0567a148c6ce9",
+        "version" : "0.8.8"
+      }
+    }
+  ],
+  "version" : 3
+}
