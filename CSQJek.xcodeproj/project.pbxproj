@@ -9,19 +9,34 @@
 /* Begin PBXBuildFile section */
 		018BDD5502AF46189B6D8606 /* ConfirmRideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3338789C2449ADA1768CB7 /* ConfirmRideView.swift */; };
 		02632837AE334901B3C76A58 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40ADFCD30D448EAA6B571C7 /* HomeView.swift */; };
+		0499A0E6C9A641058DB54B3D /* MeatCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C4C4F0189A4EFF94700762 /* MeatCategoryView.swift */; };
 		1A3275EE838D49C0B03DD632 /* CSQJekApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABEC9D2DF3C042E78874B8D9 /* CSQJekApp.swift */; };
 		1DB7F5956F844CD088C516B0 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9185992B55848F8A021AD49 /* AppTheme.swift */; };
 		1E26C67663D54418BDF1BC29 /* ProductDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F27B5E6CAB8479193D9B604 /* ProductDetailView.swift */; };
 		23AB9CEE223646978D0B6A89 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A650B0C87BE547A2A2E9FD9D /* CheckoutView.swift */; };
+		503A733D381747B4AEBB425C /* RiderTrackingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1306A3E4BA1C48D697C39DFE /* RiderTrackingView.swift */; };
 		5758DD79FD25427B99C77C38 /* DestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89190944517649B2BDDD2595 /* DestinationView.swift */; };
 		92A292762F860A4600C22A05 /* ContentsquareSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 92A292752F860A4600C22A05 /* ContentsquareSDK */; };
 		94AF069B217F41D49C52C4D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B46D25F591E4BF5ADC34DA9 /* Assets.xcassets */; };
 		9EE1CF933E7F4E76AEADD136 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8854E0A560BF445D902D346C /* CartView.swift */; };
+		AA0011223344556677889901 /* AirModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889900 /* AirModels.swift */; };
+		AA0011223344556677889903 /* CSQAirHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889902 /* CSQAirHomeView.swift */; };
+		AA0011223344556677889905 /* FlightResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889904 /* FlightResultsView.swift */; };
+		AA0011223344556677889907 /* FlightDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889906 /* FlightDetailView.swift */; };
+		AA0011223344556677889909 /* BookingConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889908 /* BookingConfirmationView.swift */; };
 		AFA27BA8D691485CB9375517 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05EF4324B4C40A98B9DB71B /* ContentView.swift */; };
 		B23570E6D92945BC87121970 /* OrderConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7AD06187354B2598A95088 /* OrderConfirmationView.swift */; };
 		B935DD3F699247138E0BD374 /* PickupLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7681FC566535457EAC4C3AB5 /* PickupLocationView.swift */; };
+		BB1100AA2233445500112201 /* CashModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112200 /* CashModels.swift */; };
+		BB1100AA2233445500112203 /* CSQCashHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112202 /* CSQCashHomeView.swift */; };
+		BB1100AA2233445500112205 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112204 /* QRScannerView.swift */; };
+		BB1100AA2233445500112207 /* SendMoneyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112206 /* SendMoneyView.swift */; };
+		BB1100AA2233445500112209 /* AddWithdrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112208 /* AddWithdrawView.swift */; };
+		CC1122334455667700112201 /* MarketConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1122334455667700112200 /* MarketConfig.swift */; };
+		CC1122334455667700112203 /* MarketPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1122334455667700112202 /* MarketPickerView.swift */; };
 		CC2233445566778899001122 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1122334455667788990011 /* SplashView.swift */; };
 		CC4A1B2E3F5D6789ABCDEF01BF /* GroceryComingSoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC4A1B2E3F5D6789ABCDEF0100 /* GroceryComingSoonView.swift */; };
+		CCDD1122334455667788AABB /* LiveAgentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD112233445566778899AA /* LiveAgentButton.swift */; };
 		D197D362908345B684276CC3 /* GroceryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF563A643C9340C0ACA5E2BD /* GroceryModels.swift */; };
 		DD9900AA1122334455667788 /* TelcoComingSoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9900AA1122334455667799 /* TelcoComingSoonView.swift */; };
 		E21430A34BF64779AC2A5677 /* RideModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A710E9C3FF44B4B4667374 /* RideModels.swift */; };
@@ -35,25 +50,12 @@
 		FF1100AA22334455667788BB /* TelcoHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1100AA22334455667788AA /* TelcoHomeView.swift */; };
 		FF1100AA22334455667788DD /* TelcoPlanDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1100AA22334455667788CC /* TelcoPlanDetailView.swift */; };
 		FF1100AA22334455667788E2 /* TelcoBillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1100AA22334455667788E1 /* TelcoBillsView.swift */; };
-		CCDD1122334455667788AABB /* LiveAgentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD112233445566778899AA /* LiveAgentButton.swift */; };
 		FF1100AA22334455667788E4 /* RageTapDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1100AA22334455667788E3 /* RageTapDetector.swift */; };
-		0499A0E6C9A641058DB54B3D /* MeatCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C4C4F0189A4EFF94700762 /* MeatCategoryView.swift */; };
-		503A733D381747B4AEBB425C /* RiderTrackingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1306A3E4BA1C48D697C39DFE /* RiderTrackingView.swift */; };
-		AA0011223344556677889901 /* AirModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889900 /* AirModels.swift */; };
-		AA0011223344556677889903 /* CSQAirHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889902 /* CSQAirHomeView.swift */; };
-		AA0011223344556677889905 /* FlightResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889904 /* FlightResultsView.swift */; };
-		AA0011223344556677889907 /* FlightDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889906 /* FlightDetailView.swift */; };
-		AA0011223344556677889909 /* BookingConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0011223344556677889908 /* BookingConfirmationView.swift */; };
-		BB1100AA2233445500112201 /* CashModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112200 /* CashModels.swift */; };
-		BB1100AA2233445500112203 /* CSQCashHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112202 /* CSQCashHomeView.swift */; };
-		BB1100AA2233445500112205 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112204 /* QRScannerView.swift */; };
-		BB1100AA2233445500112207 /* SendMoneyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112206 /* SendMoneyView.swift */; };
-		BB1100AA2233445500112209 /* AddWithdrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1100AA2233445500112208 /* AddWithdrawView.swift */; };
-		CC1122334455667700112201 /* MarketConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1122334455667700112200 /* MarketConfig.swift */; };
-		CC1122334455667700112203 /* MarketPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1122334455667700112202 /* MarketPickerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1306A3E4BA1C48D697C39DFE /* RiderTrackingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiderTrackingView.swift; sourceTree = "<group>"; };
+		16C4C4F0189A4EFF94700762 /* MeatCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeatCategoryView.swift; sourceTree = "<group>"; };
 		190287AE7C0B44E487E375F2 /* CSQJek.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CSQJek.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F27B5E6CAB8479193D9B604 /* ProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailView.swift; sourceTree = "<group>"; };
 		5E026EF556364C2AA3F916BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -63,20 +65,31 @@
 		8B46D25F591E4BF5ADC34DA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A5A710E9C3FF44B4B4667374 /* RideModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RideModels.swift; sourceTree = "<group>"; };
 		A650B0C87BE547A2A2E9FD9D /* CheckoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
+		AA0011223344556677889900 /* AirModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirModels.swift; sourceTree = "<group>"; };
+		AA0011223344556677889902 /* CSQAirHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSQAirHomeView.swift; sourceTree = "<group>"; };
+		AA0011223344556677889904 /* FlightResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightResultsView.swift; sourceTree = "<group>"; };
+		AA0011223344556677889906 /* FlightDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightDetailView.swift; sourceTree = "<group>"; };
+		AA0011223344556677889908 /* BookingConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingConfirmationView.swift; sourceTree = "<group>"; };
 		ABEC9D2DF3C042E78874B8D9 /* CSQJekApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSQJekApp.swift; sourceTree = "<group>"; };
 		AF563A643C9340C0ACA5E2BD /* GroceryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryModels.swift; sourceTree = "<group>"; };
 		B05EF4324B4C40A98B9DB71B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B9185992B55848F8A021AD49 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		BB1100AA2233445500112200 /* CashModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashModels.swift; sourceTree = "<group>"; };
+		BB1100AA2233445500112202 /* CSQCashHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSQCashHomeView.swift; sourceTree = "<group>"; };
+		BB1100AA2233445500112204 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		BB1100AA2233445500112206 /* SendMoneyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMoneyView.swift; sourceTree = "<group>"; };
+		BB1100AA2233445500112208 /* AddWithdrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWithdrawView.swift; sourceTree = "<group>"; };
 		BB1122334455667788990011 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		CC1122334455667700112200 /* MarketConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketConfig.swift; sourceTree = "<group>"; };
+		CC1122334455667700112202 /* MarketPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketPickerView.swift; sourceTree = "<group>"; };
 		CC4A1B2E3F5D6789ABCDEF0100 /* GroceryComingSoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryComingSoonView.swift; sourceTree = "<group>"; };
+		CCDD112233445566778899AA /* LiveAgentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveAgentButton.swift; sourceTree = "<group>"; };
 		DD3338789C2449ADA1768CB7 /* ConfirmRideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmRideView.swift; sourceTree = "<group>"; };
 		DD9900AA1122334455667799 /* TelcoComingSoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelcoComingSoonView.swift; sourceTree = "<group>"; };
 		E40ADFCD30D448EAA6B571C7 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		EE6C3D4A5F7F8901CDEF012301 /* FoodDeliveryComingSoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodDeliveryComingSoonView.swift; sourceTree = "<group>"; };
 		FA9F68470A634CABA9D29C56 /* GroceryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryHomeView.swift; sourceTree = "<group>"; };
 		FC7AD06187354B2598A95088 /* OrderConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmationView.swift; sourceTree = "<group>"; };
-		16C4C4F0189A4EFF94700762 /* MeatCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeatCategoryView.swift; sourceTree = "<group>"; };
-		1306A3E4BA1C48D697C39DFE /* RiderTrackingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiderTrackingView.swift; sourceTree = "<group>"; };
 		FF1100AA2233445566778800 /* FoodModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodModels.swift; sourceTree = "<group>"; };
 		FF1100AA2233445566778822 /* TelcoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelcoModels.swift; sourceTree = "<group>"; };
 		FF1100AA2233445566778844 /* FoodHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodHomeView.swift; sourceTree = "<group>"; };
@@ -85,20 +98,7 @@
 		FF1100AA22334455667788AA /* TelcoHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelcoHomeView.swift; sourceTree = "<group>"; };
 		FF1100AA22334455667788CC /* TelcoPlanDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelcoPlanDetailView.swift; sourceTree = "<group>"; };
 		FF1100AA22334455667788E1 /* TelcoBillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelcoBillsView.swift; sourceTree = "<group>"; };
-		CCDD112233445566778899AA /* LiveAgentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveAgentButton.swift; sourceTree = "<group>"; };
 		FF1100AA22334455667788E3 /* RageTapDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageTapDetector.swift; sourceTree = "<group>"; };
-		AA0011223344556677889900 /* AirModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirModels.swift; sourceTree = "<group>"; };
-		AA0011223344556677889902 /* CSQAirHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSQAirHomeView.swift; sourceTree = "<group>"; };
-		AA0011223344556677889904 /* FlightResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightResultsView.swift; sourceTree = "<group>"; };
-		AA0011223344556677889906 /* FlightDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightDetailView.swift; sourceTree = "<group>"; };
-		AA0011223344556677889908 /* BookingConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingConfirmationView.swift; sourceTree = "<group>"; };
-		BB1100AA2233445500112200 /* CashModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashModels.swift; sourceTree = "<group>"; };
-		BB1100AA2233445500112202 /* CSQCashHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSQCashHomeView.swift; sourceTree = "<group>"; };
-		BB1100AA2233445500112204 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
-		BB1100AA2233445500112206 /* SendMoneyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMoneyView.swift; sourceTree = "<group>"; };
-		BB1100AA2233445500112208 /* AddWithdrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWithdrawView.swift; sourceTree = "<group>"; };
-		CC1122334455667700112200 /* MarketConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketConfig.swift; sourceTree = "<group>"; };
-		CC1122334455667700112202 /* MarketPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketPickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,14 +128,6 @@
 			path = CSQJek;
 			sourceTree = "<group>";
 		};
-		CC1122334455667700112210 /* Config */ = {
-			isa = PBXGroup;
-			children = (
-				CC1122334455667700112200 /* MarketConfig.swift */,
-			);
-			path = Config;
-			sourceTree = "<group>";
-		};
 		395249710A854461AF86F9D4 = {
 			isa = PBXGroup;
 			children = (
@@ -161,30 +153,6 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		BB110011223344556677AABB /* Cash */ = {
-			isa = PBXGroup;
-			children = (
-				BB1100AA2233445500112200 /* CashModels.swift */,
-				BB1100AA2233445500112202 /* CSQCashHomeView.swift */,
-				BB1100AA2233445500112204 /* QRScannerView.swift */,
-				BB1100AA2233445500112206 /* SendMoneyView.swift */,
-				BB1100AA2233445500112208 /* AddWithdrawView.swift */,
-			);
-			path = Cash;
-			sourceTree = "<group>";
-		};
-		AA0011223344556677889910 /* Air */ = {
-			isa = PBXGroup;
-			children = (
-				AA0011223344556677889900 /* AirModels.swift */,
-				AA0011223344556677889902 /* CSQAirHomeView.swift */,
-				AA0011223344556677889904 /* FlightResultsView.swift */,
-				AA0011223344556677889906 /* FlightDetailView.swift */,
-				AA0011223344556677889908 /* BookingConfirmationView.swift */,
-			);
-			path = Air;
-			sourceTree = "<group>";
-		};
 		9DE0D745D46943199217EE52 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -201,13 +169,16 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
-		CCDD11223344556677880011 /* Shared */ = {
+		AA0011223344556677889910 /* Air */ = {
 			isa = PBXGroup;
 			children = (
-				CCDD112233445566778899AA /* LiveAgentButton.swift */,
-				FF1100AA22334455667788E3 /* RageTapDetector.swift */,
+				AA0011223344556677889900 /* AirModels.swift */,
+				AA0011223344556677889902 /* CSQAirHomeView.swift */,
+				AA0011223344556677889904 /* FlightResultsView.swift */,
+				AA0011223344556677889906 /* FlightDetailView.swift */,
+				AA0011223344556677889908 /* BookingConfirmationView.swift */,
 			);
-			path = Shared;
+			path = Air;
 			sourceTree = "<group>";
 		};
 		AA8E5F6C7B9B0123EF012345 /* Food */ = {
@@ -234,6 +205,35 @@
 				1306A3E4BA1C48D697C39DFE /* RiderTrackingView.swift */,
 			);
 			path = Grocery;
+			sourceTree = "<group>";
+		};
+		BB110011223344556677AABB /* Cash */ = {
+			isa = PBXGroup;
+			children = (
+				BB1100AA2233445500112200 /* CashModels.swift */,
+				BB1100AA2233445500112202 /* CSQCashHomeView.swift */,
+				BB1100AA2233445500112204 /* QRScannerView.swift */,
+				BB1100AA2233445500112206 /* SendMoneyView.swift */,
+				BB1100AA2233445500112208 /* AddWithdrawView.swift */,
+			);
+			path = Cash;
+			sourceTree = "<group>";
+		};
+		CC1122334455667700112210 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				CC1122334455667700112200 /* MarketConfig.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		CCDD11223344556677880011 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CCDD112233445566778899AA /* LiveAgentButton.swift */,
+				FF1100AA22334455667788E3 /* RageTapDetector.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		D6468F8A0E6D490B98C61B2B /* Theme */ = {
@@ -403,7 +403,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = P23WLJ4C85;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CSQJek/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableDescription = "CSQJek — Ride & Grocery Demo";
@@ -524,7 +524,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = P23WLJ4C85;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CSQJek/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableDescription = "CSQJek — Ride & Grocery Demo";

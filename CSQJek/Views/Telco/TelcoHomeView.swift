@@ -1013,7 +1013,7 @@ struct DataAddOnSheet: View {
                                 Spacer()
 
                                 Button(action: {
-                                    withAnimation { addedPacks.insert(pack.gb) }
+                                    withAnimation { _ = addedPacks.insert(pack.gb) }
                                     CSQ.trackEvent("telco_data_addon_added", properties: ["gb": pack.gb, "price": pack.price])
                                 }) {
                                     HStack(spacing: 4) {
