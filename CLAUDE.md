@@ -341,6 +341,15 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `telco_call_number_tapped` | A phone-line row tap | `line` (`general`/`billing`/`premium`), `depth` |
 | `telco_support_abandoned` | "I'll deal with this later" — the give-up signal | `last_screen`, `depth` |
 
+**Resolution / recovery paths (the positive counterparts — `TelcoBillsView.swift`).** The maze isn't only failure: the bill can actually get paid. `TelcoBillPaymentView` takes an optional `resolvedVia` — when set (`self_service` / `call_center`) the payment SUCCEEDS instead of failing (CSQ-4012). At `Telco - Call Us` the journey forks: call (→ `called_into_call_center`) or back out to the FAQ (→ `telco_call_abandoned`); a "helpful" article offers a "this fixed it → pay" CTA (→ `telco_self_service_resolved`). These reuse existing screen names (no new screens).
+
+| Event Name | Where to fire | Key Properties |
+|------------|---------------|----------------|
+| `telco_call_abandoned` | "Skip the wait — try the quick guide" tap on Call Us | `depth`, `market` |
+| `called_into_call_center` | A phone-line call connects (1.8s after tap) | `line`, `depth`, `market` |
+| `telco_self_service_resolved` | "This fixed it — pay my bill" on a helpful article | `invoice_no`, `article_id`, `resolution_path` (`self_service`), `depth`, `market` |
+| `telco_bill_payment_completed` | Payment clears (only when `resolvedVia` is set) — the terminal conversion | `invoice_no`, `amount`, `method`, `resolved_via` (`self_service`/`call_center`), `market` |
+
 **Rage / frustration signals (`Views/Shared/RageTapDetector.swift`).** The CS iOS SDK does **not** emit rage clicks client-side — rage is a behavioural signal the platform derives server-side from autocaptured taps + replay. To make it *deterministic* for demos, these explicit events fire when a user hammers a control. `RageTapDetector` is a sliding-window value type (`@State`); `FrustrationSignal` holds the emitters. Fire them in addition to (not instead of) the per-screen events.
 
 | Event Name | Where to fire | Key Properties |

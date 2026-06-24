@@ -55,6 +55,11 @@ private enum BillEvent {
     static let callUsViewed       = "telco_call_us_viewed"
     static let callNumberTapped   = "telco_call_number_tapped"
     static let supportAbandoned   = "telco_support_abandoned"   // the "pissed off and stop" signal
+    // Resolution / recovery paths (the positive counterparts)
+    static let calledIntoCallCenter = "called_into_call_center"      // call actually connected
+    static let callAbandoned        = "telco_call_abandoned"         // backed out of calling → self-serve
+    static let selfServiceResolved  = "telco_self_service_resolved"  // fixed it via the FAQ
+    static let paymentCompleted     = "telco_bill_payment_completed" // the bill finally gets paid
 }
 
 // Display a money value with an explicit sign for credits/discounts.
@@ -370,14 +375,19 @@ struct TelcoBillDetailView: View {
 struct TelcoBillPaymentView: View {
     let bill: TelcoBill
     let depth: Int
+    // nil  → the demo's always-failing payment (CSQ-4012).
+    // set  → the user already resolved the issue, so the payment SUCCEEDS.
+    //        "self_service" (fixed via FAQ) or "call_center" (agent sorted it).
+    var resolvedVia: String? = nil
     @EnvironmentObject var marketConfig: MarketConfig
+    @Environment(\.dismiss) private var dismiss
 
     @State private var method: PayMethod = .card
     @State private var phase: PayPhase = .ready
     @State private var attempts = 0
 
     enum PayMethod: String { case card, wallet }
-    enum PayPhase { case ready, processing, failed }
+    enum PayPhase { case ready, processing, failed, succeeded }
 
     private let errorCode = "CSQ-4012"
 
@@ -439,7 +449,35 @@ struct TelcoBillPaymentView: View {
                     .transition(.opacity)
                 }
 
+                // Success banner — the bill finally gets paid
+                if phase == .succeeded {
+                    VStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 52)).foregroundColor(.csqSuccess)
+                        Text(jp ? "お支払い完了" : "Bill paid")
+                            .font(AppFont.display(20)).fontWeight(.bold).foregroundColor(.csqTextPrimary)
+                        Text((jp ? "お支払いが完了しました — " : "Your payment of ")
+                             + telcoMoney(bill.amount, m)
+                             + (jp ? " 円" : " went through."))
+                            .font(AppFont.body(13)).foregroundColor(.csqTextSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, 16)
+                    .transition(.opacity)
+                }
+
                 // Primary action
+                if phase == .succeeded {
+                    Button { dismiss() } label: {
+                        Text(jp ? "完了" : "Done")
+                            .font(AppFont.body(16)).fontWeight(.bold).foregroundColor(.white)
+                            .frame(maxWidth: .infinity).padding(.vertical, 16)
+                            .background(Color.csqSuccess)
+                            .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
+                    }
+                    .accessibilityIdentifier("payment_btn_done")
+                    .accessibilityLabel(jp ? "完了" : "Done")
+                } else {
                 Button {
                     guard phase != .processing else { return }
                     attempts += 1
@@ -450,6 +488,16 @@ struct TelcoBillPaymentView: View {
                         "method": method.rawValue, "attempt": attempts, "market": m.trackingLabel
                     ])
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                        // If the user already resolved the issue, the payment clears.
+                        if let via = resolvedVia {
+                            withAnimation { phase = .succeeded }
+                            CSQ.trackEvent(BillEvent.paymentCompleted, properties: [
+                                "invoice_no": bill.invoiceNo, "amount": bill.amount,
+                                "method": method.rawValue, "resolved_via": via,
+                                "market": m.trackingLabel
+                            ])
+                            return
+                        }
                         withAnimation { phase = .failed }
                         CSQ.trackEvent(BillEvent.paymentFailed, properties: [
                             "invoice_no": bill.invoiceNo, "amount": bill.amount,
@@ -481,6 +529,7 @@ struct TelcoBillPaymentView: View {
                 }
                 .accessibilityIdentifier("payment_btn_pay")
                 .accessibilityLabel(jp ? "支払う" : "Pay bill")
+                }
 
                 // Help pivot — gets more prominent the more they fail (into the maze)
                 if phase == .failed {
@@ -709,6 +758,7 @@ struct TelcoSupportArticleView: View {
         let m = marketConfig.market
         let jp = m == .tokyo
         let related = article.relatedIDs.compactMap { TelcoSupportArticle.article($0, for: m) }
+        let bill = TelcoBill.currentBill(for: m)
 
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
@@ -742,6 +792,31 @@ struct TelcoSupportArticleView: View {
                 .padding(14)
                 .background(Color.csqSurface)
                 .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
+
+                // Helpful → let them resolve & pay right now (the self-service recovery path)
+                if feedback == true {
+                    NavigationLink(destination: TelcoBillPaymentView(bill: bill, depth: depth + 1, resolvedVia: "self_service")) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                            Text(jp ? "解決した — 請求書を支払う" : "This fixed it — pay my bill")
+                            Spacer()
+                            Text(telcoMoney(bill.amount, m)).fontWeight(.bold)
+                        }
+                        .font(AppFont.body(15)).fontWeight(.semibold).foregroundColor(.white)
+                        .padding(14).frame(maxWidth: .infinity)
+                        .background(Color.csqSuccess)
+                        .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("article_btn_resolve_pay")
+                    .accessibilityLabel(jp ? "請求書を支払う" : "Pay my bill now")
+                    .simultaneousGesture(TapGesture().onEnded {
+                        CSQ.trackEvent(BillEvent.selfServiceResolved, properties: [
+                            "invoice_no": bill.invoiceNo, "article_id": article.id,
+                            "resolution_path": "self_service", "depth": depth, "market": m.trackingLabel
+                        ])
+                    })
+                }
 
                 // When NOT helpful → deflect into MORE articles, then a buried escalation link
                 if feedback == false {
@@ -1282,6 +1357,8 @@ struct TelcoLiveChatView: View {
 struct TelcoCallUsView: View {
     let depth: Int
     @EnvironmentObject var marketConfig: MarketConfig
+    @State private var callingLine: String? = nil
+    @State private var callConnected = false
 
     // (line key, label, number, hours, wait) — regional.
     private func lines(_ m: Market, jp: Bool) -> [(String, String, String, String, String)] {
@@ -1310,6 +1387,7 @@ struct TelcoCallUsView: View {
     var body: some View {
         let m = marketConfig.market
         let jp = m == .tokyo
+        let bill = TelcoBill.currentBill(for: m)
 
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
@@ -1327,11 +1405,47 @@ struct TelcoCallUsView: View {
                 .background(Color.csqWarning.opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
 
+                // FORK: skip the wait and self-serve via the guide instead (recovery path)
+                if let art = TelcoSupportArticle.article("payment_declined", for: m) {
+                    NavigationLink(destination: TelcoSupportArticleView(article: art, depth: depth + 1, source: "returned_from_call_us")) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "bolt.fill").foregroundColor(.csqTelcoTeal)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(jp ? "待ち時間をスキップ — クイックガイドを試す" : "Skip the wait — try the quick guide")
+                                    .font(AppFont.body(14)).fontWeight(.semibold).foregroundColor(.csqTextPrimary)
+                                Text(jp ? "多くの問題は数分で自己解決できます" : "Most issues self-resolve in a couple of minutes")
+                                    .font(AppFont.body(11)).foregroundColor(.csqTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.caption2).foregroundColor(.csqBorder)
+                        }
+                        .padding(14).frame(maxWidth: .infinity)
+                        .background(Color.csqTelcoTeal.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("callus_btn_try_guide")
+                    .accessibilityLabel(jp ? "クイックガイドを試す" : "Try the quick guide")
+                    .simultaneousGesture(TapGesture().onEnded {
+                        CSQ.trackEvent(BillEvent.callAbandoned, properties: [
+                            "depth": depth, "market": m.trackingLabel
+                        ])
+                    })
+                }
+
                 ForEach(lines(m, jp: jp), id: \.0) { line in
                     Button {
                         CSQ.trackEvent(BillEvent.callNumberTapped, properties: [
                             "line": line.0, "depth": depth, "market": m.trackingLabel
                         ])
+                        callingLine = line.0
+                        callConnected = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                            withAnimation { callConnected = true }
+                            CSQ.trackEvent(BillEvent.calledIntoCallCenter, properties: [
+                                "line": line.0, "depth": depth, "market": m.trackingLabel
+                            ])
+                        }
                     } label: {
                         HStack(spacing: 14) {
                             Image(systemName: "phone.fill")
@@ -1355,6 +1469,33 @@ struct TelcoCallUsView: View {
                     }
                     .accessibilityIdentifier("callus_btn_\(line.0)")
                     .accessibilityLabel(jp ? "電話をかける \(line.1)" : "Call \(line.1)")
+                }
+
+                // Call confirmation — the call connects, then the agent resolves it → pay
+                if callingLine != nil {
+                    VStack(spacing: 12) {
+                        HStack(spacing: 10) {
+                            Image(systemName: callConnected ? "phone.fill" : "phone.arrow.up.right.fill")
+                                .foregroundColor(callConnected ? .csqSuccess : .csqTelcoTeal)
+                            Text(callConnected
+                                 ? (jp ? "担当者につながりました" : "Connected to an agent")
+                                 : (jp ? "通話中…" : "Connecting your call…"))
+                                .font(AppFont.body(14)).fontWeight(.semibold).foregroundColor(.csqTextPrimary)
+                            Spacer()
+                            if !callConnected { ProgressView() }
+                        }
+                        if callConnected {
+                            NavigationLink(destination: TelcoBillPaymentView(bill: bill, depth: depth + 1, resolvedVia: "call_center")) {
+                                TelcoCTALabel(text: jp ? "担当者が解決 — 請求書を支払う" : "The agent sorted it — pay my bill")
+                            }
+                            .accessibilityIdentifier("callus_btn_agent_resolved_pay")
+                        }
+                    }
+                    .padding(14).background(Color.csqSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
+                    .overlay(RoundedRectangle(cornerRadius: AppRadius.md)
+                        .stroke(Color.csqTelcoTeal.opacity(0.3), lineWidth: 1))
+                    .transition(.opacity)
                 }
 
                 // The explicit "give up" exit — the frustrated-abandonment signal for CS
