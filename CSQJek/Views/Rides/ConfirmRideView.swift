@@ -24,7 +24,13 @@ struct ConfirmRideView: View {
     @State private var promoFailures = 0
 
     private var rideOptions: [RideOption] { marketConfig.content.rideOptions }
-    var selectedRide: RideOption { rideOptions[selectedRideIndex] }
+    var selectedRide: RideOption {
+        // Clamp to valid bounds so the ride flow can't crash mid-demo if the
+        // selected index ever drifts out of range (e.g. the market's ride
+        // options change). Market content is always non-empty.
+        let safeIndex = max(0, min(selectedRideIndex, rideOptions.count - 1))
+        return rideOptions[safeIndex]
+    }
 
     var body: some View {
         let s = marketConfig.strings
