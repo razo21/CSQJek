@@ -395,7 +395,7 @@ struct MenuItemRow: View {
                         .background(Circle().fill(Color(hex: "#FF8C42")))
                 }
                 .scaleEffect(isAnimating ? 1.2 : 1.0)
-                .accessibilityIdentifier(RestaurantAccessID.addButton(item.id))
+                .accessibilityIdentifier("restaurant_add_\(item.id)")
             }
         }
         .padding(12)
