@@ -382,7 +382,8 @@ struct MenuItemRow: View {
                     CSQ.trackEvent("food_item_added", properties: [
                         "item_name": item.name,
                         "price": item.price,
-                        "restaurant": restaurant.name
+                        "restaurant": restaurant.name,
+                        "market": marketConfig.market.trackingLabel
                     ])
                 }) {
                     Image(systemName: "plus")
