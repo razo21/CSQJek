@@ -161,8 +161,11 @@ struct MeatCategoryView: View {
             CSQ.trackScreenview("Grocery - Meat")
             CSQ.trackEvent("meat_category_viewed", properties: ["subcategory": selectedSubcategory])
         }
-        .onChange(of: selectedSubcategoryIndex) { _, idx in
-            CSQ.trackEvent("meat_subcategory_tapped", properties: ["subcategory": englishSubcategories[idx]])
+        .onChange(of: selectedSubcategoryIndex) { _, _ in
+            // Route through the clamped `selectedSubcategory` — the raw
+            // `englishSubcategories[idx]` here was still crash-prone for a market
+            // whose localized list is longer than the fixed English one.
+            CSQ.trackEvent("meat_subcategory_tapped", properties: ["subcategory": selectedSubcategory])
         }
     }
 
