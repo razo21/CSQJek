@@ -434,7 +434,8 @@ struct FoodOrderView: View {
                             "item_count":    cartStore.itemCount,
                             "total":         String(format: "%.2f", total),
                             "delivery_fee":  String(format: "%.2f", deliveryFeeValue),
-                            "attempt_number": orderAttempts
+                            "attempt_number": orderAttempts,
+                            "market":        marketConfig.market.trackingLabel
                         ])
 
                         // Attempts 1 & 2 fail after a long wait. 3rd succeeds.
@@ -447,7 +448,8 @@ struct FoodOrderView: View {
                                     "restaurant":    restaurant.name,
                                     "attempt_number": orderAttempts,
                                     "error_code":    "CHECKOUT_TIMEOUT",
-                                    "visible_to_user": true
+                                    "visible_to_user": true,
+                                    "market":        marketConfig.market.trackingLabel
                                 ])
                                 withAnimation(.spring()) {
                                     orderErrorMessage = marketConfig.strings.foodSomethingWentWrong
@@ -592,7 +594,8 @@ struct FoodOrderView: View {
                                 CSQ.trackEvent("recommended_item_added", properties: [
                                     "item":       item.name,
                                     "price":      String(format: "%.2f", item.price),
-                                    "restaurant": restaurant.name
+                                    "restaurant": restaurant.name,
+                                    "market":     marketConfig.market.trackingLabel
                                 ])
                             } label: {
                                 Image(systemName: "plus.circle.fill")

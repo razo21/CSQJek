@@ -500,7 +500,9 @@ struct CSQCashHomeView: View {
 
             Button {
                 showAllTx = true
-                CSQ.trackEvent("cash_view_all_transactions_tapped")
+                CSQ.trackEvent("cash_view_all_transactions_tapped", properties: [
+                    "market": marketConfig.market.trackingLabel
+                ])
             } label: {
                 Text(marketConfig.strings.cashViewAllTx)
                     .font(.system(size: 13, weight: .medium))
