@@ -26,10 +26,13 @@ by priorities. Worked one small batch at a time, each delivered as a CI-checked 
 ## Priority 1 — Robustness (crash-safety; demo must never crash)
 
 - [x] **S** — `ConfirmRideView.selectedRide` clamps its index (was an unguarded subscript). — *Batch 1*
-- [ ] **S** _(candidate)_ — `MeatCategoryView` subcategory index: confirm `selectedSubcategoryIndex` stays in bounds across `onChange`. `Views/Grocery/MeatCategoryView.swift`
+- [x] **S** — `MeatCategoryView.selectedSubcategory` clamps its index. Real latent crash: tabs are driven by the **localized** `martMeatSubcategories` (sets the index), but the index subscripts a **hardcoded 6-element** `englishSubcategories` — a market with a differently-sized localized list would crash. — *Batch 3*
 - [ ] **S** _(candidate)_ — `FlightResultsView` → `FlightDetailView`: confirm selected-flight access is guarded. `Views/Air/FlightResultsView.swift`
 - [ ] **S** — `FoodHomeView` search: add a "no results" empty state so an unmatched search term doesn't collapse the layout to blank. `Views/Food/FoodHomeView.swift` **M** if it touches several sections.
+- [ ] **S** — `CheckoutView` (Phase 2, locked) has the **same hardcoded-array-indexed-by-state pattern** (`slots[selectedSlotIndex]`, `payments[selectedPaymentIndex]`) — harden when Phase 2 unlocks.
 - [ ] **S** — `CartView` (Phase 2, locked): empty-state render when items are removed to zero — defer until Phase 2.
+
+**Audit pattern — "hardcoded array indexed by localized/mutable state":** swept the live views (`@State …Index` → subscript). Fixed `ConfirmRideView` + `MeatCategoryView`. **Verified safe** (don't re-investigate): `RestaurantDetailView.menu[index]` (index from `ForEach(0..<count)`), `FoodOrderView.stepIcons[index]` (`steps`/`stepIcons` both fixed at 4). Still to check: `QRScannerView.demoIndex`, `HomeView.promoIndex` (likely modulo/TabView-bound, low risk).
 
 ## Priority 2 — CS-SDK instrumentation gaps (the app's whole purpose)
 
@@ -82,3 +85,4 @@ Tokyo is already ~90% localized (real Japanese strings, Tokyo landmarks, Japanes
 ## Batch log
 - **Batch 1** — Establish this backlog + harden `ConfirmRideView.selectedRide` against out-of-bounds. (PR: "First improvements: backlog + ride-flow hardening")
 - **Batch 2** — Tokyo believability: full Japanese event-label catalog (`EVENT_LABELS_JA.md`) for the Japanese team's Contentsquare dashboard. (PR: "Tokyo: Japanese event-label catalog")
+- **Batch 3** — Crash-safety sweep: fixed `MeatCategoryView` index out-of-bounds; verified `RestaurantDetailView`/`FoodOrderView` safe; logged the audit pattern. (PR: "Crash-safety: clamp MeatCategoryView subcategory index")
