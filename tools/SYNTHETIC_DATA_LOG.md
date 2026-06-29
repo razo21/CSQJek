@@ -7,7 +7,7 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
 |---|---|
 | **PA environment id (app_id)** | `4140621035` |
 | **Ingestion endpoint** | `https://heapanalytics.com/api/track` (+ `/api/add_user_properties`) — confirmed working |
-| **Generators** | `tools/seed_cs_funnel.py`, `tools/seed_callcenter_return.py` |
+| **Generators** | `tools/seed_cs_funnel.py`, `tools/seed_callcenter_return.py`, `tools/seed_device_credit.py` |
 | **Isolate / clean up** | filter `synthetic = true`, or by `cohort` |
 
 > ⚠️ **DATA IS TIME-RELATIVE — REGENERATE PERIODICALLY.**
@@ -79,6 +79,15 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
 - **Fork:** at `telco_call_number_tapped` the cohort splits ~458 call (path A) vs 200 self-serve (path B). Analyze via a journey from `telco_call_number_tapped`, or split a funnel by the `resolved_via` property.
 - **Status:** **active.**
 
+### 8. Device-purchase + credit-check fork — `device_credit_demo`  ⟶ READY (not yet sent)
+- **Date:** generated 2026-06-29 · **Script:** `seed_device_credit.py` (new)
+- **Cmd (suggested):** `--users 600 --days 14 --seed 42 --cohort device_credit_demo --max-workers 8 --send`
+- **Status:** **dry-run verified, NOT yet sent.** Claude does not push to the live tenant — run the `--send` command above yourself when ready.
+- **Content:** the CSQMobile device-purchase funnel ending in the credit-check **FORK** — `telco_device_viewed → variant → financing → plan_attached → checkout_started → fulfillment → payment_method → telco_credit_check_started → telco_credit_check_result → {approved → telco_purchase_completed | declined → telco_credit_recovery_outright → telco_purchase_completed | abandon}`. Plus a `screen_viewed` layer (`Telco - Device Detail → Device Financing → Checkout → Credit Check → Order Confirmed`).
+- **The point — approval varies by cohort.** Each user carries the live app's cohort props (`account_type`, `loyalty_tier`, `is_new_user`, `tenure_days`, `lifetime_orders`, `signup_channel`); approval probability is computed from them. Dry-run (400 users, seed 42) showed **premium 63% vs standard 43%** approval; **platinum 73% vs none 25%**. Split the `telco_credit_check_result` funnel by `account_type` / `loyalty_tier` to demo it.
+- **Funnel note:** to see the recovery arm, include `telco_credit_recovery_outright` between `telco_credit_check_result` and `telco_purchase_completed`, or split `telco_purchase_completed` by `finance_mode` (`outright` = recovered after a decline).
+- **New events:** none beyond the documented telco device tables (CLAUDE.md) — fully aligned, so it merges with real device-purchase sessions.
+
 ---
 
 ## How to regenerate (after the dates age out)
@@ -88,6 +97,8 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
    python3 tools/seed_cs_funnel.py --users 800 --days 14 --seed 42 \
      --cohort bill_payment_frustration_v2 --max-workers 8 --send
    python3 tools/seed_callcenter_return.py --send
+   python3 tools/seed_device_credit.py --users 600 --days 14 --seed 42 \
+     --cohort device_credit_demo --max-workers 8 --send
    ```
 2. **Mind duplicate identities.** Both scripts use *deterministic* identities
    (`seed_cs_funnel.py` = `syn-<run_tag>-<index>`; `seed_callcenter_return.py` =
