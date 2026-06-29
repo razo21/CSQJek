@@ -28,6 +28,10 @@ xcuserdata/
 !.claude/hooks/
 .claude/settings.local.json
 
+# ── Python (tools/ synthetic-data generators) ──────────
+__pycache__/
+*.pyc
+
 # ── Editors / misc ─────────────────────────────────────
 *.swp
 *~
