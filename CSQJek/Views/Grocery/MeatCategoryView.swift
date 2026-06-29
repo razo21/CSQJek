@@ -16,7 +16,13 @@ struct MeatCategoryView: View {
 
     private let englishSubcategories = ["All", "Chicken", "Beef", "Pork", "Lamb", "Seafood"]
     private var subcategories: [String] { marketConfig.strings.martMeatSubcategories }
-    private var selectedSubcategory: String { englishSubcategories[selectedSubcategoryIndex] }
+    private var selectedSubcategory: String {
+        // The tab bar is driven by the localized `subcategories` array, but this
+        // stable English token comes from a fixed list. Clamp the index so a market
+        // whose localized list has a different length can't crash the screen.
+        let i = min(max(selectedSubcategoryIndex, 0), englishSubcategories.count - 1)
+        return englishSubcategories[i]
+    }
 
     enum SortOption: String, CaseIterable {
         case featured   = "featured"
@@ -153,7 +159,7 @@ struct MeatCategoryView: View {
         }
         .onAppear {
             CSQ.trackScreenview("Grocery - Meat")
-            CSQ.trackEvent("meat_category_viewed", properties: ["subcategory": englishSubcategories[selectedSubcategoryIndex]])
+            CSQ.trackEvent("meat_category_viewed", properties: ["subcategory": selectedSubcategory])
         }
         .onChange(of: selectedSubcategoryIndex) { _, idx in
             CSQ.trackEvent("meat_subcategory_tapped", properties: ["subcategory": englishSubcategories[idx]])
