@@ -63,5 +63,22 @@ by priorities. Worked one small batch at a time, each delivered as a CI-checked 
 
 ---
 
+## Tokyo (東京) believability initiative
+Make the Tokyo market feel authentically Japanese for the Japanese team who run this demo.
+Tokyo is already ~90% localized (real Japanese strings, Tokyo landmarks, Japanese restaurants
+& driver, ¥ pricing, PayPay/Suica). Remaining work:
+
+- [x] **Japanese event-label catalog** — `EVENT_LABELS_JA.md`: every tracked event mapped to a
+  日本語 display label, applied as dashboard aliases (stable English keys preserved). — *Batch 2*
+- [ ] **S** — `TelcoHeaderTokyo` asset is missing (only `TelcoHeaderSG` exists) → Telco header
+  falls back. Needs a Tokyo telco hero photo. **(blocked on user-provided image)**
+- [ ] _(candidate)_ — Tokyo restaurant/dish photos are generic vs Singapore-specific shots;
+  swap in Tokyo-authentic imagery. **(blocked on user-provided images — manifest TBD)**
+- [ ] _(candidate)_ — Scan Tokyo content for any English/placeholder leakage in `MarketContent.tokyo`
+  and `JapaneseStrings`; fill gaps. `Config/MarketConfig.swift`
+- [ ] _(optional)_ — Japanese glossary for key property *values* (not just event names), if the
+  team wants `result`/`finance_mode`/etc. values readable in 日本語 too.
+
 ## Batch log
 - **Batch 1** — Establish this backlog + harden `ConfirmRideView.selectedRide` against out-of-bounds. (PR: "First improvements: backlog + ride-flow hardening")
+- **Batch 2** — Tokyo believability: full Japanese event-label catalog (`EVENT_LABELS_JA.md`) for the Japanese team's Contentsquare dashboard. (PR: "Tokyo: Japanese event-label catalog")
