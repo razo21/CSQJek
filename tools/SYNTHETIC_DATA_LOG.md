@@ -7,7 +7,7 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
 |---|---|
 | **PA environment id (app_id)** | `4140621035` |
 | **Ingestion endpoint** | `https://heapanalytics.com/api/track` (+ `/api/add_user_properties`) — confirmed working |
-| **Generators** | `tools/seed_cs_funnel.py`, `tools/seed_callcenter_return.py`, `tools/seed_device_credit.py` |
+| **Generators** | `tools/seed_cs_funnel.py`, `tools/seed_callcenter_return.py`, `tools/seed_device_credit.py`, `tools/seed_consumer_funnels.py` |
 | **Isolate / clean up** | filter `synthetic = true`, or by `cohort` |
 
 > ⚠️ **DATA IS TIME-RELATIVE — REGENERATE PERIODICALLY.**
@@ -88,6 +88,20 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
 - **Funnel note:** to see the recovery arm, include `telco_credit_recovery_outright` between `telco_credit_check_result` and `telco_purchase_completed`, or split `telco_purchase_completed` by `finance_mode` (`outright` = recovered after a decline).
 - **New events:** none beyond the documented telco device tables (CLAUDE.md) — fully aligned, so it merges with real device-purchase sessions.
 
+### 9. CSQRide booking funnel by cohort — `ride_funnel_demo`  ⟶ READY (not yet sent)
+- **Date:** generated 2026-06-29 · **Script:** `seed_consumer_funnels.py --funnel ride` (new)
+- **Cmd (suggested):** `--funnel ride --users 600 --days 14 --seed 42 --cohort ride_funnel_demo --max-workers 8 --send`
+- **Status:** **dry-run verified, NOT yet sent.** Run the `--send` command yourself when ready.
+- **Content:** `service_tile_tapped(CSQRide) → destination_selected → ride_option_selected → ride_booked`, with a **promo sub-branch** (`promo_tapped → promo_code_invalid → promo_rage_apply`) and a **cancel branch** (`ride_cancelled`). Screen layer `Rides → Ride - Destination → Ride - Pickup → Ride - Confirm → Ride - Driver Found`.
+- **Cohort signal** (dry-run, 500 users, seed 42): completion **premium 56% vs standard 38%**; by tier **platinum 61% → none 32%**. Split the ride funnel by `account_type` / `loyalty_tier`.
+
+### 10. CSQFood ordering funnel by cohort — `food_funnel_demo`  ⟶ READY (not yet sent)
+- **Date:** generated 2026-06-29 · **Script:** `seed_consumer_funnels.py --funnel food` (new)
+- **Cmd (suggested):** `--funnel food --users 600 --days 14 --seed 42 --cohort food_funnel_demo --max-workers 8 --send`
+- **Status:** **dry-run verified, NOT yet sent.**
+- **Content:** `food_restaurant_tapped → food_item_added×N → food_order_placed` (attempts 1–3 with `food_order_failed` friction, retry/abandon by cohort) `→ food_track_order_tapped`. Screen layer `Food - Home → Food - Restaurant Menu → Food - Checkout → Food - Order Confirmed`.
+- **Cohort signal** (dry-run, 500 users, seed 42): completion **premium 68% vs standard 55%**; by tier **platinum 74% → bronze 44%**. The order success-vs-abandon branch segments by cohort.
+
 ---
 
 ## How to regenerate (after the dates age out)
@@ -99,6 +113,10 @@ Analytics** environment for the CSQJek demo. Update this file on every new run.
    python3 tools/seed_callcenter_return.py --send
    python3 tools/seed_device_credit.py --users 600 --days 14 --seed 42 \
      --cohort device_credit_demo --max-workers 8 --send
+   python3 tools/seed_consumer_funnels.py --funnel ride --users 600 --days 14 --seed 42 \
+     --cohort ride_funnel_demo --max-workers 8 --send
+   python3 tools/seed_consumer_funnels.py --funnel food --users 600 --days 14 --seed 42 \
+     --cohort food_funnel_demo --max-workers 8 --send
    ```
 2. **Mind duplicate identities.** Both scripts use *deterministic* identities
    (`seed_cs_funnel.py` = `syn-<run_tag>-<index>`; `seed_callcenter_return.py` =
