@@ -36,6 +36,8 @@ by priorities. Worked one small batch at a time, each delivered as a CI-checked 
 
 ## Priority 2 — CS-SDK instrumentation gaps (the app's whole purpose)
 
+- [x] **S** — Added the missing `market` property to 5 events (`food_item_added`, `food_order_placed`, `food_order_failed`, `recommended_item_added`, `cash_view_all_transactions_tapped`) so every funnel segments by market. — *Batch 4*
+- [ ] **S** — Accessibility-ID gaps (audited & verified; a started batch was deferred to build persona variety first): FoodHomeView "See All" ×3 + hawker / free-delivery / all-restaurants rows + floating cart bar; RestaurantDetailView add-to-cart + ± quantity buttons; plus a new `food_view_cart_tapped` event. `Views/Food/FoodHomeView.swift`, `RestaurantDetailView.swift`
 - [ ] **S** _(candidate)_ — `SendMoneyView` tab switches (contacts → transfer → international) fire no event. Add `cash_send_tab_selected` { tab, market }. `Views/Cash/SendMoneyView.swift`
 - [ ] **S** _(candidate)_ — `CSQAirHomeView` popular-destination taps fire no event. Add `air_destination_selected` { destination, market }. `Views/Air/CSQAirHomeView.swift`
 - [ ] **S** _(candidate)_ — `TelcoHomeView` data-usage dial card: confirm it's tappable and add `.accessibilityIdentifier()` if missing. `Views/Telco/TelcoHomeView.swift`
@@ -66,6 +68,33 @@ by priorities. Worked one small batch at a time, each delivered as a CI-checked 
 
 ---
 
+## Funnels & Journeys initiative (PM-demo analytics)
+Make the app generate rich, segmentable funnels and multi-branch journeys a real PM would
+analyse. (Full recommendation set discussed with the user.)
+
+**Done**
+- [x] Cohort user properties (`is_new_user`, `tenure_days`, `lifetime_orders`, `loyalty_tier`,
+  `signup_channel`) so every funnel segments by user type. — *Batch 5*
+- [x] Per-session persona variety — random pick from a 6-persona roster each launch so cohort
+  segments populate MULTIPLE buckets, not one. — *Batch 6*
+
+**Pending a user decision**
+- [ ] **Behavior variety** — different conversion/outcome rates by cohort. Options: (a) synthetic
+  historical data via the existing `tools/seed_*` scripts (keeps the live demo deterministic —
+  recommended), (b) persona-conditional live outcomes (richer but risks live-demo predictability),
+  (c) hold. **Awaiting user choice.**
+
+**Ready to assemble in the CS dashboard (events already exist)**
+- Conversion funnels: ride · food · telco plan signup · cash QR · air booking · Live Agent adoption.
+- Multi-branch journeys: ⭐ telco bill-payment resolution maze (deflect / retry / call / self-serve /
+  abandon) · ⭐ device purchase + credit-check fork (approved / declined→recovery) · ride book-vs-cancel ·
+  food success-vs-failure · cash success-vs-insufficient-funds.
+
+**Follow-ups (app-side data)**
+- [ ] Two-sided credit-check outcome (price/persona-based) so the device fork populates both arms —
+  **touches deliberate demo behavior; needs sign-off.**
+- [ ] `experiment_variant` session tag → enables an A/B funnel-comparison demo.
+
 ## Tokyo (東京) believability initiative
 Make the Tokyo market feel authentically Japanese for the Japanese team who run this demo.
 Tokyo is already ~90% localized (real Japanese strings, Tokyo landmarks, Japanese restaurants
@@ -86,3 +115,7 @@ Tokyo is already ~90% localized (real Japanese strings, Tokyo landmarks, Japanes
 - **Batch 1** — Establish this backlog + harden `ConfirmRideView.selectedRide` against out-of-bounds. (PR: "First improvements: backlog + ride-flow hardening")
 - **Batch 2** — Tokyo believability: full Japanese event-label catalog (`EVENT_LABELS_JA.md`) for the Japanese team's Contentsquare dashboard. (PR: "Tokyo: Japanese event-label catalog")
 - **Batch 3** — Crash-safety sweep: fixed `MeatCategoryView` index out-of-bounds; verified `RestaurantDetailView`/`FoodOrderView` safe; logged the audit pattern. (PR: "Crash-safety: clamp MeatCategoryView subcategory index")
+- **Batch 4** — Instrumentation: added the missing `market` property to 5 Food/Cash events so funnels segment by market. (PR: "Instrumentation: add market property to Food/Cash events")
+- **Batch 5** — Cohort user properties for funnel segmentation. (PR: "Add cohort user properties for funnel segmentation")
+- **Batch 6** — Per-session demo-persona variety so cohort segments populate multiple buckets. (PR: "Vary demo persona per session for multi-bucket segmentation")
+- **Batch 7** — Backlog sync (this) + complete the `MeatCategoryView` hardening (the `meat_subcategory_tapped` event still indexed the raw array). (PR: "Backlog sync + finish MeatCategoryView hardening")
