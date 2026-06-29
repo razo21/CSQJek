@@ -46,9 +46,16 @@ struct CSQJekApp: App {
         // MARK: - Demo User Identity
         CSQ.identify("jeff.lin@demo.com")
         CSQ.addUserProperties([
-            "name":         "Jeff Lin",
-            "account_type": "premium",
-            "demo_user":    true
+            "name":            "Jeff Lin",
+            "account_type":    "premium",
+            "demo_user":       true,
+            // Cohort dimensions — let every funnel / journey segment by user type
+            // (new vs returning, tenure, order volume, loyalty, acquisition channel).
+            "is_new_user":     false,
+            "tenure_days":     487,
+            "lifetime_orders": 213,
+            "loyalty_tier":    "gold",
+            "signup_channel":  "referral"
             // "market" is set after the user picks a region in MarketPickerView
         ])
     }
