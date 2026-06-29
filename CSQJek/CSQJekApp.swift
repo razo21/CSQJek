@@ -43,22 +43,51 @@ struct CSQJekApp: App {
         CSQ.maskImages(false)
         CSQ.maskTextInputs(false)
 
-        // MARK: - Demo User Identity
-        CSQ.identify("jeff.lin@demo.com")
+        // MARK: - Demo User Identity (varied per session)
+        // Pick a random persona each launch so Contentsquare sees a VARIETY of
+        // users. This lets the cohort segments (account_type, loyalty_tier,
+        // is_new_user, signup_channel) populate multiple buckets across funnels
+        // and journeys instead of a single one. Every persona is fake and carries
+        // demo_user:true so demo traffic stays filterable. ("market" is added
+        // after the user picks a region in MarketPickerView.)
+        let persona = CSQJekApp.demoPersonas.randomElement() ?? CSQJekApp.demoPersonas[0]
+        CSQ.identify(persona.email)
         CSQ.addUserProperties([
-            "name":            "Jeff Lin",
-            "account_type":    "premium",
+            "name":            persona.name,
+            "account_type":    persona.accountType,
             "demo_user":       true,
-            // Cohort dimensions — let every funnel / journey segment by user type
-            // (new vs returning, tenure, order volume, loyalty, acquisition channel).
-            "is_new_user":     false,
-            "tenure_days":     487,
-            "lifetime_orders": 213,
-            "loyalty_tier":    "gold",
-            "signup_channel":  "referral"
-            // "market" is set after the user picks a region in MarketPickerView
+            "is_new_user":     persona.isNewUser,
+            "tenure_days":     persona.tenureDays,
+            "lifetime_orders": persona.lifetimeOrders,
+            "loyalty_tier":    persona.loyaltyTier,
+            "signup_channel":  persona.signupChannel
         ])
     }
+
+    // MARK: - Demo Persona Roster
+    // A spread of fake users so CS segmentation shows multiple buckets instead of
+    // one. A persona is chosen at random each launch (see init). All are fictitious
+    // and tagged demo_user:true. Market is chosen separately in MarketPickerView,
+    // so any persona can run in any market.
+    private struct DemoPersona {
+        let email: String
+        let name: String
+        let accountType: String      // "premium" | "standard"
+        let isNewUser: Bool
+        let tenureDays: Int
+        let lifetimeOrders: Int
+        let loyaltyTier: String      // "platinum" | "gold" | "silver" | "bronze" | "none"
+        let signupChannel: String    // "referral" | "organic" | "paid_ad" | "partner"
+    }
+
+    private static let demoPersonas: [DemoPersona] = [
+        DemoPersona(email: "jeff.lin@demo.com",     name: "Jeff Lin",     accountType: "premium",  isNewUser: false, tenureDays: 487, lifetimeOrders: 213, loyaltyTier: "gold",     signupChannel: "referral"),
+        DemoPersona(email: "mei.tan@demo.com",      name: "Mei Tan",      accountType: "standard", isNewUser: false, tenureDays: 192, lifetimeOrders: 64,  loyaltyTier: "silver",   signupChannel: "organic"),
+        DemoPersona(email: "arjun.rao@demo.com",    name: "Arjun Rao",    accountType: "standard", isNewUser: true,  tenureDays: 3,   lifetimeOrders: 1,   loyaltyTier: "bronze",   signupChannel: "paid_ad"),
+        DemoPersona(email: "sofia.cruz@demo.com",   name: "Sofia Cruz",   accountType: "premium",  isNewUser: false, tenureDays: 921, lifetimeOrders: 540, loyaltyTier: "platinum", signupChannel: "referral"),
+        DemoPersona(email: "ken.watanabe@demo.com", name: "Ken Watanabe", accountType: "standard", isNewUser: true,  tenureDays: 0,   lifetimeOrders: 0,   loyaltyTier: "none",     signupChannel: "organic"),
+        DemoPersona(email: "luca.bianchi@demo.com", name: "Luca Bianchi", accountType: "premium",  isNewUser: false, tenureDays: 365, lifetimeOrders: 158, loyaltyTier: "gold",     signupChannel: "partner")
+    ]
 
     var body: some Scene {
         WindowGroup {
