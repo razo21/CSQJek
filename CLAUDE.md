@@ -290,6 +290,7 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `food_item_added` | Add-to-cart button in RestaurantDetailView | `item_name`, `price`, `restaurant` |
 | `food_order_placed` | Place Order button in FoodOrderView | `restaurant`, `item_count`, `total`, `delivery_fee` |
 | `food_track_order_tapped` | Track button in OrderConfirmedView | `restaurant` |
+| `food_view_cart_tapped` | Floating cart bar tap in FoodHomeView | `item_count`, `subtotal`, `market` |
 | `telco_plan_viewed` | Plan card becomes visible in TelcoHomeView | `plan_name`, `plan_type`, `price` |
 | `telco_addon_tapped` | Add-on row tap in TelcoHomeView | `addon_name` |
 | `telco_plan_signup_tapped` | Sign-up CTA in TelcoPlanDetailView | `plan_name`, `plan_type`, `price` |

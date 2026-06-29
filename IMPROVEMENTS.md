@@ -37,7 +37,7 @@ by priorities. Worked one small batch at a time, each delivered as a CI-checked 
 ## Priority 2 — CS-SDK instrumentation gaps (the app's whole purpose)
 
 - [x] **S** — Added the missing `market` property to 5 events (`food_item_added`, `food_order_placed`, `food_order_failed`, `recommended_item_added`, `cash_view_all_transactions_tapped`) so every funnel segments by market. — *Batch 4*
-- [ ] **S** — Accessibility-ID gaps (audited & verified; a started batch was deferred to build persona variety first): FoodHomeView "See All" ×3 + hawker / free-delivery / all-restaurants rows + floating cart bar; RestaurantDetailView add-to-cart + ± quantity buttons; plus a new `food_view_cart_tapped` event. `Views/Food/FoodHomeView.swift`, `RestaurantDetailView.swift`
+- [x] **S** — Accessibility-ID gaps closed in the Food flow: FoodHomeView "See All" ×3 + hawker / free-delivery / all-restaurants rows + floating cart bar; RestaurantDetailView add-to-cart + ± quantity buttons; plus a new `food_view_cart_tapped` event. — *Batch 10*
 - [ ] **S** _(candidate)_ — `SendMoneyView` tab switches (contacts → transfer → international) fire no event. Add `cash_send_tab_selected` { tab, market }. `Views/Cash/SendMoneyView.swift`
 - [ ] **S** _(candidate)_ — `CSQAirHomeView` popular-destination taps fire no event. Add `air_destination_selected` { destination, market }. `Views/Air/CSQAirHomeView.swift`
 - [ ] **S** _(candidate)_ — `TelcoHomeView` data-usage dial card: confirm it's tappable and add `.accessibilityIdentifier()` if missing. `Views/Telco/TelcoHomeView.swift`
@@ -78,11 +78,11 @@ analyse. (Full recommendation set discussed with the user.)
 - [x] Per-session persona variety — random pick from a 6-persona roster each launch so cohort
   segments populate MULTIPLE buckets, not one. — *Batch 6*
 
-**Pending a user decision**
-- [ ] **Behavior variety** — different conversion/outcome rates by cohort. Options: (a) synthetic
-  historical data via the existing `tools/seed_*` scripts (keeps the live demo deterministic —
-  recommended), (b) persona-conditional live outcomes (richer but risks live-demo predictability),
-  (c) hold. **Awaiting user choice.**
+**Done (cont.)**
+- [x] **Behavior variety** (chose option A — synthetic data, keeps the live demo deterministic):
+  new generators tie conversion/approval rates to cohort props. `tools/seed_device_credit.py`
+  (device + credit fork), `tools/seed_consumer_funnels.py` (ride + food). Dry-run verified; the
+  user runs `--send`. — *Batches 8 & 9*
 
 **Ready to assemble in the CS dashboard (events already exist)**
 - Conversion funnels: ride · food · telco plan signup · cash QR · air booking · Live Agent adoption.
@@ -119,3 +119,6 @@ Tokyo is already ~90% localized (real Japanese strings, Tokyo landmarks, Japanes
 - **Batch 5** — Cohort user properties for funnel segmentation. (PR: "Add cohort user properties for funnel segmentation")
 - **Batch 6** — Per-session demo-persona variety so cohort segments populate multiple buckets. (PR: "Vary demo persona per session for multi-bucket segmentation")
 - **Batch 7** — Backlog sync (this) + complete the `MeatCategoryView` hardening (the `meat_subcategory_tapped` event still indexed the raw array). (PR: "Backlog sync + finish MeatCategoryView hardening")
+- **Batch 8** — Synthetic data: device-purchase + credit-check fork generator with cohort-varied approval (`tools/seed_device_credit.py`). (PR: "Synthetic data: device-purchase + credit-check fork by cohort")
+- **Batch 9** — Synthetic data: ride + food funnel generators with cohort-varied completion (`tools/seed_consumer_funnels.py`). (PR: "Synthetic data: ride + food funnels by cohort")
+- **Batch 10** — Close accessibility-ID gaps in the Food flow + new `food_view_cart_tapped` event. (PR: "Food: close accessibility-ID gaps + cart-tap event")

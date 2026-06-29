@@ -349,6 +349,7 @@ struct MenuItemRow: View {
                             .foregroundColor(Color(hex: "#FF8C42"))
                             .frame(width: 24, height: 24)
                     }
+                    .accessibilityIdentifier("restaurant_item_qty_minus_\(item.id)")
 
                     Text("\(quantity)")
                         .font(.system(size: 12, weight: .semibold))
@@ -365,6 +366,7 @@ struct MenuItemRow: View {
                             .foregroundColor(Color(hex: "#FF8C42"))
                             .frame(width: 24, height: 24)
                     }
+                    .accessibilityIdentifier("restaurant_item_qty_plus_\(item.id)")
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
@@ -393,6 +395,7 @@ struct MenuItemRow: View {
                         .background(Circle().fill(Color(hex: "#FF8C42")))
                 }
                 .scaleEffect(isAnimating ? 1.2 : 1.0)
+                .accessibilityIdentifier(RestaurantAccessID.addButton(item.id))
             }
         }
         .padding(12)
