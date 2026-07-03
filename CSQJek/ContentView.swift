@@ -390,28 +390,35 @@ enum DemoErrorSimulator {
         FakeError(path: "/v1/promo/validate",  method: "GET",  status: 404, message: "Not Found")
     ]
 
-    /// Perform a real request that fails with `error.status`, so the SDK captures a
-    /// native network error (no custom event).
-    static func fire(_ error: FakeError, screen: String, market: String) {
-        var comps = URLComponents(string: "\(testHost)/\(error.status)")
+    /// Fire a real failing request with an explicit status/path — used for in-flow
+    /// errors (payment declined, checkout timeout) so they are captured NATIVELY
+    /// (Error Analysis + Session Replay timeline), not as custom events.
+    static func requestFailure(status: Int, method: String, path: String, screen: String, market: String) {
+        var comps = URLComponents(string: "\(testHost)/\(status)")
         // Carry demo context on the query string — it shows in the captured
         // request's Network Details without needing a custom event.
         comps?.queryItems = [
             URLQueryItem(name: "screen", value: screen),
             URLQueryItem(name: "market", value: market),
-            URLQueryItem(name: "path", value: error.path)
+            URLQueryItem(name: "path", value: path)
         ]
         guard let url = comps?.url else { return }
 
         var request = URLRequest(url: url)
-        request.httpMethod = error.method
+        request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         URLSession.shared.dataTask(with: request) { _, response, err in
             let code = (response as? HTTPURLResponse)?.statusCode ?? -1
-            print("🌐 Demo API error: \(error.method) \(error.path) → \(code) "
-                  + (err?.localizedDescription ?? error.message))
+            print("🌐 Demo API error: \(method) \(path) → \(code) "
+                  + (err?.localizedDescription ?? "status \(status)"))
         }.resume()
+    }
+
+    /// Fire a catalogue error (used by the Profile Demo Tools buttons).
+    static func fire(_ error: FakeError, screen: String, market: String) {
+        requestFailure(status: error.status, method: error.method, path: error.path,
+                       screen: screen, market: market)
     }
 
     static func fireRandom(screen: String, market: String) {
