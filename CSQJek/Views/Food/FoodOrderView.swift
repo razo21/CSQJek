@@ -451,6 +451,14 @@ struct FoodOrderView: View {
                                     "visible_to_user": true,
                                     "market":        marketConfig.market.trackingLabel
                                 ])
+                                // Also fire a REAL failing request so the checkout failure
+                                // is captured NATIVELY (Error Analysis + replay timeline),
+                                // in addition to the funnel event above.
+                                DemoErrorSimulator.requestFailure(
+                                    status: 503, method: "POST", path: "/v1/food/checkout",
+                                    screen: "Food - Checkout",
+                                    market: marketConfig.market.trackingLabel
+                                )
                                 withAnimation(.spring()) {
                                     orderErrorMessage = marketConfig.strings.foodSomethingWentWrong
                                 }

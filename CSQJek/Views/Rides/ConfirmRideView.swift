@@ -237,12 +237,14 @@ struct ConfirmRideView: View {
 
                             // American Express is not accepted — fire error after a realistic processing delay
                             if selectedPayment == .amex {
-                                CSQ.trackEvent("payment_error", properties: [
-                                    "card_type":    "American Express",
-                                    "error_code":   "CARD_TYPE_NOT_SUPPORTED",
-                                    "ride_type":    selectedRide.name,
-                                    "price":        selectedRide.price
-                                ])
+                                // Fire a REAL failing request → native network error
+                                // (Error Analysis + Session Replay timeline), not a custom
+                                // event. The "Payment declined." banner below is the in-flow UX.
+                                DemoErrorSimulator.requestFailure(
+                                    status: 402, method: "POST", path: "/v1/payments/charge",
+                                    screen: "Ride - Confirm",
+                                    market: marketConfig.market.trackingLabel
+                                )
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                     isBooking = false
                                     withAnimation(.spring(response: 0.4)) {
