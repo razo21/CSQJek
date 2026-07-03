@@ -368,9 +368,12 @@ struct ProfileView: View {
 //   • An SDK build that performs the URLSession auto-collection (verify in-simulator;
 //     if 1.6.2 does not, an SDK bump is the escalation path).
 //
-// Endpoint: httpstat.us echoes whatever status code you request, over HTTPS, so a
-// real request to /<code> yields a genuine 4XX/5XX the SDK can capture. Swap
-// `testHost` for a branded backend if one becomes available.
+// Endpoint: httpbin.org/status/<code> returns the requested status code DIRECTLY
+// over HTTPS — no redirect — so a real request yields a genuine 4XX/5XX the SDK
+// can capture. (httpstat.us was tried first but 301-redirects the request, which
+// drops the connection with -1005 "network connection lost" and no HTTP status,
+// so the SDK never sees a >=400 to classify.) Swap `testHost` for a branded
+// backend if one becomes available.
 enum DemoErrorSimulator {
 
     struct FakeError {
@@ -380,7 +383,7 @@ enum DemoErrorSimulator {
         let message: String
     }
 
-    static let testHost = "https://httpstat.us"
+    static let testHost = "https://httpbin.org/status"
 
     static let catalogue: [FakeError] = [
         FakeError(path: "/v1/rides/book",      method: "POST", status: 500, message: "Internal Server Error"),
