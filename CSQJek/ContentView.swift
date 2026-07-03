@@ -1,5 +1,6 @@
 import SwiftUI
 import ContentsquareSDK
+import Foundation
 
 // MARK: - Root Tab View
 
@@ -355,48 +356,62 @@ struct ProfileView: View {
 }
 
 // MARK: - Demo API Error Simulator
-// Demo-only. The app has no real network layer (see CLAUDE.md), so we fabricate
-// API failures and report them to Contentsquare:
-//   1. Product Analytics — a custom `api_error` event (works on any plan). ACTIVE.
-//   2. Experience Analytics Error Analysis (network metric) — currently DISABLED
-//      because the API type isn't exported by the pinned SDK 1.6.2 (see fire()).
-// Nothing here performs a real network request. Every value is fake.
+// Fires a REAL failing HTTPS request so the Contentsquare SDK auto-collects it as
+// a NATIVE network error — surfacing in Experience Analytics → Error Analysis AND
+// on the Session Replay timeline. This is *system recognition*, NOT a custom
+// `trackEvent`. The Contentsquare iOS SDK automatically collects failed URLSession
+// requests with a status code >= 400.
+//
+// Requirements for the native error to appear:
+//   • Experience Monitoring add-on enabled on the CS tenant (Enterprise, or Pro add-on).
+//   • API-error auto-collection left ON (do NOT set CSDisableAPIErrorsAutoCollection).
+//   • An SDK build that performs the URLSession auto-collection (verify in-simulator;
+//     if 1.6.2 does not, an SDK bump is the escalation path).
+//
+// Endpoint: httpstat.us echoes whatever status code you request, over HTTPS, so a
+// real request to /<code> yields a genuine 4XX/5XX the SDK can capture. Swap
+// `testHost` for a branded backend if one becomes available.
 enum DemoErrorSimulator {
 
     struct FakeError {
-        let endpoint: String
+        let path: String       // logical endpoint (for the console log / query context)
         let method: String
         let status: Int
         let message: String
     }
 
+    static let testHost = "https://httpstat.us"
+
     static let catalogue: [FakeError] = [
-        FakeError(endpoint: "https://api.csqjek.com/v1/rides/book",      method: "POST", status: 500, message: "Internal Server Error"),
-        FakeError(endpoint: "https://api.csqjek.com/v1/payments/charge", method: "POST", status: 402, message: "Payment Required"),
-        FakeError(endpoint: "https://api.csqjek.com/v1/food/checkout",   method: "POST", status: 503, message: "Service Unavailable"),
-        FakeError(endpoint: "https://api.csqjek.com/v1/auth/session",    method: "GET",  status: 401, message: "Unauthorized"),
-        FakeError(endpoint: "https://api.csqjek.com/v1/promo/validate",  method: "GET",  status: 404, message: "Not Found")
+        FakeError(path: "/v1/rides/book",      method: "POST", status: 500, message: "Internal Server Error"),
+        FakeError(path: "/v1/payments/charge", method: "POST", status: 402, message: "Payment Required"),
+        FakeError(path: "/v1/food/checkout",   method: "POST", status: 503, message: "Service Unavailable"),
+        FakeError(path: "/v1/auth/session",    method: "GET",  status: 401, message: "Unauthorized"),
+        FakeError(path: "/v1/promo/validate",  method: "GET",  status: 404, message: "Not Found")
     ]
 
-    /// Fire a fake API error into both Product Analytics and Experience Analytics.
+    /// Perform a real request that fails with `error.status`, so the SDK captures a
+    /// native network error (no custom event).
     static func fire(_ error: FakeError, screen: String, market: String) {
-        // 1) Product Analytics custom event.
-        CSQ.trackEvent("api_error", properties: [
-            "endpoint":    error.endpoint,
-            "http_method": error.method,
-            "status_code": error.status,
-            "message":     error.message,
-            "screen":      screen,
-            "market":      market,
-            "simulated":   true
-        ])
+        var comps = URLComponents(string: "\(testHost)/\(error.status)")
+        // Carry demo context on the query string — it shows in the captured
+        // request's Network Details without needing a custom event.
+        comps?.queryItems = [
+            URLQueryItem(name: "screen", value: screen),
+            URLQueryItem(name: "market", value: market),
+            URLQueryItem(name: "path", value: error.path)
+        ]
+        guard let url = comps?.url else { return }
 
-        // 2) Experience Analytics — Error Analysis network metric.
-        // DISABLED: the `HTTPMetric` API is not exported by ContentsquareSDK
-        // 1.6.2 (the pinned version), so it does not compile here. The PA event
-        // above is what "registered in PA" needs. To populate the EA Error
-        // Analysis dashboard, upgrade the SDK, re-enable a verified network-metric
-        // call, and ensure the Experience Monitoring add-on is enabled.
+        var request = URLRequest(url: url)
+        request.httpMethod = error.method
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        URLSession.shared.dataTask(with: request) { _, response, err in
+            let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+            print("🌐 Demo API error: \(error.method) \(error.path) → \(code) "
+                  + (err?.localizedDescription ?? error.message))
+        }.resume()
     }
 
     static func fireRandom(screen: String, market: String) {
