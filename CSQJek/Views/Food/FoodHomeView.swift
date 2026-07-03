@@ -10,8 +10,16 @@ struct FoodHomeView: View {
 
     private enum FoodAccessID {
         static let searchBar = "food_search_bar"
+        static let cartBar = "food_cart_bar"
         static func chip(_ category: FoodCategory) -> String { "food_chip_\(category.rawValue)" }
         static func featured(_ index: Int) -> String { "food_featured_\(index)" }
+        static func seeAll(_ section: String) -> String { "food_see_all_\(section)" }
+        static func hawkerCard(_ name: String) -> String { "food_hawker_\(slug(name))" }
+        static func freeDeliveryRow(_ name: String) -> String { "food_free_delivery_\(slug(name))" }
+        static func restaurantRow(_ name: String) -> String { "food_restaurant_row_\(slug(name))" }
+        private static func slug(_ s: String) -> String {
+            s.lowercased().replacingOccurrences(of: " ", with: "_")
+        }
     }
 
     var filteredRestaurants: [Restaurant] {
@@ -199,6 +207,7 @@ struct FoodHomeView: View {
                 }
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color(hex: "#FF8C42"))
+                .accessibilityIdentifier(FoodAccessID.seeAll("featured"))
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -239,6 +248,7 @@ struct FoodHomeView: View {
                 }
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color(hex: "#FF8C42"))
+                .accessibilityIdentifier(FoodAccessID.seeAll("hawker"))
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -251,6 +261,7 @@ struct FoodHomeView: View {
                             RestaurantTileCard(restaurant: restaurant)
                         }
                         .simultaneousGesture(TapGesture().onEnded { activeRestaurant = restaurant })
+                        .accessibilityIdentifier(FoodAccessID.hawkerCard(restaurant.name))
                     }
                 }
             }
@@ -276,6 +287,7 @@ struct FoodHomeView: View {
                 }
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color(hex: "#FF8C42"))
+                .accessibilityIdentifier(FoodAccessID.seeAll("free_delivery"))
             }
 
             VStack(spacing: 8) {
@@ -287,6 +299,7 @@ struct FoodHomeView: View {
                         RestaurantRow(restaurant: restaurant)
                     }
                     .simultaneousGesture(TapGesture().onEnded { activeRestaurant = restaurant })
+                    .accessibilityIdentifier(FoodAccessID.freeDeliveryRow(restaurant.name))
                 }
             }
         }
@@ -310,6 +323,7 @@ struct FoodHomeView: View {
                             "cuisine": restaurant.cuisine
                         ])
                     })
+                    .accessibilityIdentifier(FoodAccessID.restaurantRow(restaurant.name))
                 }
             }
         }
@@ -347,6 +361,14 @@ struct FoodHomeView: View {
             .padding(16)
             .background(Color(hex: "#F8F3EF"))
         }
+        .simultaneousGesture(TapGesture().onEnded {
+            CSQ.trackEvent("food_view_cart_tapped", properties: [
+                "item_count": cartStore.itemCount,
+                "subtotal": String(format: "%.2f", cartStore.subtotal),
+                "market": marketConfig.market.trackingLabel
+            ])
+        })
+        .accessibilityIdentifier(FoodAccessID.cartBar)
     }
 }
 
