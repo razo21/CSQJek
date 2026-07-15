@@ -240,7 +240,8 @@ struct RestaurantDetailView: View {
 
     // Hero entry point to the customizer — only shown for buildable venues (CSQ Burrito).
     private var buildYourOwnBanner: some View {
-        NavigationLink(
+        let strings = BurritoBuilder.strings(for: marketConfig.market)
+        return NavigationLink(
             destination: BurritoBuilderView(restaurant: restaurant, cartStore: cartStore)
                 .environmentObject(marketConfig)
         ) {
@@ -252,10 +253,10 @@ struct RestaurantDetailView: View {
                     .background(Circle().fill(Color.white.opacity(0.18)))
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Build Your Own Burrito")
+                    Text(strings.bannerTitle)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
-                    Text("Base · protein · salsa · toppings — your way")
+                    Text(strings.bannerSubtitle)
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(.white.opacity(0.9))
                 }
@@ -531,9 +532,13 @@ struct BurritoBuilderView: View {
 
     // MARK: Derived state
 
+    private var market: Market { marketConfig.market }
+    private var steps: [BurritoStep] { BurritoBuilder.steps(for: market) }
+    private var strings: BurritoStrings { BurritoBuilder.strings(for: market) }
+
     private var totalPrice: Double {
-        var total = BurritoBuilder.basePrice
-        for step in BurritoBuilder.steps {
+        var total = BurritoBuilder.basePrice(for: market)
+        for step in steps {
             let chosen = selections[step.key] ?? []
             for option in step.options where chosen.contains(option.idKey) {
                 total += option.priceDelta
@@ -543,7 +548,7 @@ struct BurritoBuilderView: View {
     }
 
     private var requiredSatisfied: Bool {
-        BurritoBuilder.requiredKeys.allSatisfy { !(selections[$0] ?? []).isEmpty }
+        BurritoBuilder.requiredKeys(for: market).allSatisfy { !(selections[$0] ?? []).isEmpty }
     }
 
     private func isSelected(_ stepKey: String, _ optionKey: String) -> Bool {
@@ -559,7 +564,7 @@ struct BurritoBuilderView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 20) {
-                        ForEach(BurritoBuilder.steps) { step in
+                        ForEach(steps) { step in
                             stepSection(step)
                         }
                         Spacer(minLength: 20)
@@ -603,7 +608,7 @@ struct BurritoBuilderView: View {
                 .accessibilityLabel("Close burrito builder")
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Build Your Own Burrito")
+                    Text(strings.builderTitle)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                     Text(restaurant.name)
@@ -628,7 +633,7 @@ struct BurritoBuilderView: View {
                     .foregroundColor(Color(hex: "#1C1C2E"))
 
                 if step.required {
-                    Text("Required")
+                    Text(strings.requiredBadge)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(Color(hex: "#0E7A46"))
                         .padding(.horizontal, 6).padding(.vertical, 2)
@@ -737,7 +742,7 @@ struct BurritoBuilderView: View {
 
             Button(action: addBuildToCart) {
                 HStack(spacing: 8) {
-                    Text(requiredSatisfied ? "Add to Cart" : "Choose base, protein & salsa")
+                    Text(requiredSatisfied ? strings.addToCart : strings.addToCartLocked)
                         .font(.system(size: 15, weight: .semibold))
                     Spacer()
                     Text(marketConfig.market.formatPrice(totalPrice))
@@ -764,10 +769,13 @@ struct BurritoBuilderView: View {
     private func addBuildToCart() {
         guard requiredSatisfied else { return }
 
-        let proteinName = selectedName(step: "protein") ?? "Custom"
+        let proteinName = selectedName(step: "protein") ?? ""
         let summary = buildSummary()
+        let displayName = proteinName.isEmpty
+            ? strings.cartNamePrefix
+            : "\(strings.cartNamePrefix) · \(proteinName)"
         let item = MenuItem(
-            name: "Build Your Own Burrito · \(proteinName)",
+            name: displayName,
             description: summary,
             price: totalPrice,
             isPopular: false,
@@ -797,7 +805,7 @@ struct BurritoBuilderView: View {
     // First chosen option's display name for a single-select step.
     private func selectedName(step: String) -> String? {
         guard let key = selectedKey(step: step),
-              let stepDef = BurritoBuilder.steps.first(where: { $0.key == step }),
+              let stepDef = steps.first(where: { $0.key == step }),
               let option = stepDef.options.first(where: { $0.idKey == key })
         else { return nil }
         return option.name
@@ -806,7 +814,7 @@ struct BurritoBuilderView: View {
     // Human-readable summary for the cart line description.
     private func buildSummary() -> String {
         var parts: [String] = []
-        for step in BurritoBuilder.steps {
+        for step in steps {
             let chosen = selections[step.key] ?? []
             let names = step.options
                 .filter { chosen.contains($0.idKey) }

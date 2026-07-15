@@ -143,7 +143,7 @@ This table reflects the actual `CSQ.trackScreenview(...)` calls in the code as o
 | `RestaurantDetailView.swift` | `"Food - Restaurant Menu"` | ✅ live |
 | `FoodOrderView.swift` (checkout) | `"Food - Checkout"` | ✅ live |
 | `OrderConfirmedView` (in FoodOrderView) | `"Food - Order Confirmed"` | ✅ live |
-| `RestaurantDetailView.swift` (BurritoBuilderView) | `"Burrito - Builder"` | ✅ live (CSQ Burrito parody demo — Sydney) |
+| `RestaurantDetailView.swift` (BurritoBuilderView) | `"Burrito - Builder"` | ✅ live (CSQ Burrito parody demo — all markets, localized) |
 | `FoodDeliveryComingSoonView.swift` | `"Food - Coming Soon"` | legacy stub |
 | `TelcoHomeView.swift` | `"Telco - Home"` | ✅ live |
 | `TelcoPlanDetailView.swift` | `"Telco - Plan Detail"` | ✅ live |
