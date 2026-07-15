@@ -119,6 +119,15 @@ Tokyo is already ~90% localized (real Japanese strings, Tokyo landmarks, Japanes
 - **Batch 5** — Cohort user properties for funnel segmentation. (PR: "Add cohort user properties for funnel segmentation")
 - **Batch 6** — Per-session demo-persona variety so cohort segments populate multiple buckets. (PR: "Vary demo persona per session for multi-bucket segmentation")
 - **Batch 7** — Backlog sync (this) + complete the `MeatCategoryView` hardening (the `meat_subcategory_tapped` event still indexed the raw array). (PR: "Backlog sync + finish MeatCategoryView hardening")
+
+## One-off parody demos (separate branches — NOT merged to main)
+- **CSQ Burrito** (`demo/csq-burrito`) — Guzman y Gomez pitch (Australia, Sydney market). Adds a parody
+  Mexican QSR to CSQFood + a "Build Your Own Burrito" customizer (base → protein → salsa → toppings →
+  extras) to demo an ordering-capabilities journey. New screen `"Burrito - Builder"`; build funnel
+  events `burrito_build_started → burrito_{base,protein,salsa,topping,extra}_selected →
+  burrito_build_completed`, then the standard CSQFood checkout/tracking. Reuses `FoodCartStore`; no new
+  files (appended to `FoodModels.swift` + `RestaurantDetailView.swift`) so no pbxproj edits. **Kept off
+  main — this is a demo-only branch.**
 - **Batch 8** — Synthetic data: device-purchase + credit-check fork generator with cohort-varied approval (`tools/seed_device_credit.py`). (PR: "Synthetic data: device-purchase + credit-check fork by cohort")
 - **Batch 9** — Synthetic data: ride + food funnel generators with cohort-varied completion (`tools/seed_consumer_funnels.py`). (PR: "Synthetic data: ride + food funnels by cohort")
 - **Batch 10** — Close accessibility-ID gaps in the Food flow + new `food_view_cart_tapped` event. (PR: "Food: close accessibility-ID gaps + cart-tap event")

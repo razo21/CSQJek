@@ -13,6 +13,7 @@ struct RestaurantDetailView: View {
     private enum RestaurantAccessID {
         static let backButton = "restaurant_back_button"
         static let viewCartButton = "restaurant_view_cart_button"
+        static let buildBanner = "restaurant_build_your_own_banner"
         static func categoryTab(_ index: Int) -> String { "restaurant_category_tab_\(index)" }
         static func itemRow(_ itemId: UUID) -> String { "restaurant_item_\(itemId)" }
         static func addButton(_ itemId: UUID) -> String { "restaurant_add_\(itemId)" }
@@ -30,6 +31,10 @@ struct RestaurantDetailView: View {
 
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 20) {
+                            if restaurant.buildable {
+                                buildYourOwnBanner
+                            }
+
                             ForEach(0..<restaurant.menu.count, id: \.self) { index in
                                 if index == selectedSectionIndex || restaurant.menu.count == 1 {
                                     menuSectionView(restaurant.menu[index])
@@ -231,6 +236,46 @@ struct RestaurantDetailView: View {
                 }
             }
         }
+    }
+
+    // Hero entry point to the customizer — only shown for buildable venues (CSQ Burrito).
+    private var buildYourOwnBanner: some View {
+        NavigationLink(
+            destination: BurritoBuilderView(restaurant: restaurant, cartStore: cartStore)
+                .environmentObject(marketConfig)
+        ) {
+            HStack(spacing: 14) {
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 46, height: 46)
+                    .background(Circle().fill(Color.white.opacity(0.18)))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Build Your Own Burrito")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Base · protein · salsa · toppings — your way")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+            .padding(14)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [Color(hex: "#1FA463"), Color(hex: "#0E7A46")]),
+                    startPoint: .leading, endPoint: .trailing
+                )
+            )
+            .cornerRadius(14)
+        }
+        .accessibilityIdentifier(RestaurantAccessID.buildBanner)
     }
 
     private var bottomCartBar: some View {
@@ -458,5 +503,318 @@ struct MenuItemRow: View {
             restaurant: Restaurant.sampleRestaurants[0],
             cartStore: FoodCartStore()
         )
+    }
+}
+
+// MARK: - Build Your Own Burrito (CSQ Burrito parody demo)
+//
+// Single-screen customizer. Every option tap fires that step's `burrito_<x>_selected`
+// event; "Add to Cart" fires `burrito_build_completed` and drops a configured MenuItem
+// (fresh UUID → its own cart line) into the shared FoodCartStore, so the standard
+// CSQFood checkout + tracking flow handles the rest. Screen: "Burrito - Builder".
+struct BurritoBuilderView: View {
+    let restaurant: Restaurant
+    @ObservedObject var cartStore: FoodCartStore
+    @EnvironmentObject var marketConfig: MarketConfig
+    @Environment(\.presentationMode) var presentationMode
+
+    // step.key → set of chosen option idKeys. Single-mode steps hold 0 or 1.
+    @State private var selections: [String: Set<String>] = [:]
+
+    private enum BurritoAccessID {
+        static let closeButton = "burrito_builder_close"
+        static let addToCartButton = "burrito_builder_add_to_cart"
+        static func option(_ stepKey: String, _ optionKey: String) -> String {
+            "burrito_option_\(stepKey)_\(optionKey)"
+        }
+    }
+
+    // MARK: Derived state
+
+    private var totalPrice: Double {
+        var total = BurritoBuilder.basePrice
+        for step in BurritoBuilder.steps {
+            let chosen = selections[step.key] ?? []
+            for option in step.options where chosen.contains(option.idKey) {
+                total += option.priceDelta
+            }
+        }
+        return total
+    }
+
+    private var requiredSatisfied: Bool {
+        BurritoBuilder.requiredKeys.allSatisfy { !(selections[$0] ?? []).isEmpty }
+    }
+
+    private func isSelected(_ stepKey: String, _ optionKey: String) -> Bool {
+        (selections[stepKey] ?? []).contains(optionKey)
+    }
+
+    var body: some View {
+        ZStack {
+            Color(hex: "#F8F3EF").ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                header
+
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        ForEach(BurritoBuilder.steps) { step in
+                            stepSection(step)
+                        }
+                        Spacer(minLength: 20)
+                    }
+                    .padding(16)
+                }
+
+                addToCartBar
+            }
+            .navigationBarHidden(true)
+        }
+        .onAppear {
+            CSQ.trackScreenview("Burrito - Builder")
+            CSQ.trackEvent("burrito_build_started", properties: [
+                "restaurant": restaurant.name,
+                "market": marketConfig.market.trackingLabel
+            ])
+        }
+    }
+
+    // MARK: Header
+
+    private var header: some View {
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [Color(hex: "#1FA463"), Color(hex: "#0E7A46")]),
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            .frame(height: 96)
+            .ignoresSafeArea(edges: .top)
+
+            HStack(spacing: 12) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(hex: "#0E7A46"))
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(Color.white))
+                }
+                .accessibilityIdentifier(BurritoAccessID.closeButton)
+                .accessibilityLabel("Close burrito builder")
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Build Your Own Burrito")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                    Text(restaurant.name)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+        }
+        .frame(height: 96)
+    }
+
+    // MARK: Step section
+
+    private func stepSection(_ step: BurritoStep) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(step.title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(Color(hex: "#1C1C2E"))
+
+                if step.required {
+                    Text("Required")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(Color(hex: "#0E7A46"))
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Color(hex: "#DCFCE7"))
+                        .cornerRadius(3)
+                }
+
+                Spacer()
+
+                Text(step.subtitle)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Color(hex: "#6B7280"))
+            }
+
+            VStack(spacing: 8) {
+                ForEach(step.options) { option in
+                    optionRow(step, option)
+                }
+            }
+        }
+    }
+
+    private func optionRow(_ step: BurritoStep, _ option: BurritoOption) -> some View {
+        let selected = isSelected(step.key, option.idKey)
+        return Button(action: { toggle(step, option) }) {
+            HStack(spacing: 12) {
+                Image(systemName: indicatorSymbol(step.mode, selected: selected))
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundColor(selected ? Color(hex: "#1FA463") : Color(hex: "#C4C4C4"))
+
+                Text(option.name)
+                    .font(.system(size: 14, weight: selected ? .semibold : .regular))
+                    .foregroundColor(Color(hex: "#1C1C2E"))
+
+                if let tag = option.tag {
+                    Text(tag)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(Color(hex: "#0E7A46"))
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Color(hex: "#DCFCE7"))
+                        .cornerRadius(3)
+                }
+
+                Spacer()
+
+                if option.priceDelta > 0 {
+                    Text("+\(marketConfig.market.formatPrice(option.priceDelta))")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color(hex: "#6B7280"))
+                }
+            }
+            .padding(12)
+            .background(Color.white)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(selected ? Color(hex: "#1FA463") : Color(hex: "#E8E0DA"),
+                            lineWidth: selected ? 1.5 : 1)
+            )
+        }
+        .accessibilityIdentifier(BurritoAccessID.option(step.key, option.idKey))
+        .accessibilityLabel(option.name)
+    }
+
+    private func indicatorSymbol(_ mode: BurritoSelectionMode, selected: Bool) -> String {
+        switch mode {
+        case .single: return selected ? "largecircle.fill.circle" : "circle"
+        case .multi:  return selected ? "checkmark.square.fill" : "square"
+        }
+    }
+
+    // MARK: Selection logic
+
+    private func toggle(_ step: BurritoStep, _ option: BurritoOption) {
+        var chosen = selections[step.key] ?? []
+
+        switch step.mode {
+        case .single:
+            // Radio: re-tapping the same option keeps it; tapping another replaces.
+            if chosen.contains(option.idKey) { return }
+            chosen = [option.idKey]
+        case .multi:
+            if chosen.contains(option.idKey) {
+                chosen.remove(option.idKey)     // deselect — no event
+                selections[step.key] = chosen
+                return
+            }
+            chosen.insert(option.idKey)
+        }
+
+        selections[step.key] = chosen
+
+        CSQ.trackEvent(step.selectEvent, properties: [
+            "option": option.idKey,
+            "step": step.key,
+            "price_delta": option.priceDelta,
+            "market": marketConfig.market.trackingLabel
+        ])
+    }
+
+    // MARK: Add to cart
+
+    private var addToCartBar: some View {
+        VStack(spacing: 0) {
+            Divider().background(Color(hex: "#E8E0DA"))
+
+            Button(action: addBuildToCart) {
+                HStack(spacing: 8) {
+                    Text(requiredSatisfied ? "Add to Cart" : "Choose base, protein & salsa")
+                        .font(.system(size: 15, weight: .semibold))
+                    Spacer()
+                    Text(marketConfig.market.formatPrice(totalPrice))
+                        .font(.system(size: 15, weight: .bold))
+                }
+                .foregroundColor(.white)
+                .padding(.vertical, 14)
+                .padding(.horizontal, 18)
+                .background(
+                    requiredSatisfied
+                        ? Color(hex: "#1FA463")
+                        : Color(hex: "#9CA3AF")
+                )
+                .cornerRadius(12)
+                .padding(12)
+            }
+            .disabled(!requiredSatisfied)
+            .accessibilityIdentifier(BurritoAccessID.addToCartButton)
+            .accessibilityLabel("Add your burrito to cart")
+        }
+        .background(Color.white)
+    }
+
+    private func addBuildToCart() {
+        guard requiredSatisfied else { return }
+
+        let proteinName = selectedName(step: "protein") ?? "Custom"
+        let summary = buildSummary()
+        let item = MenuItem(
+            name: "Build Your Own Burrito · \(proteinName)",
+            description: summary,
+            price: totalPrice,
+            isPopular: false,
+            tag: nil,
+            idKey: "byo_burrito"
+        )
+        cartStore.add(item)
+
+        CSQ.trackEvent("burrito_build_completed", properties: [
+            "base":          selectedKey(step: "base") ?? "",
+            "protein":       selectedKey(step: "protein") ?? "",
+            "salsa":         selectedKey(step: "salsa") ?? "",
+            "topping_count": (selections["toppings"] ?? []).count,
+            "extra_count":   (selections["extras"] ?? []).count,
+            "total":         totalPrice,
+            "market":        marketConfig.market.trackingLabel
+        ])
+
+        presentationMode.wrappedValue.dismiss()
+    }
+
+    // First chosen option's stable key for a single-select step.
+    private func selectedKey(step: String) -> String? {
+        (selections[step] ?? []).first
+    }
+
+    // First chosen option's display name for a single-select step.
+    private func selectedName(step: String) -> String? {
+        guard let key = selectedKey(step: step),
+              let stepDef = BurritoBuilder.steps.first(where: { $0.key == step }),
+              let option = stepDef.options.first(where: { $0.idKey == key })
+        else { return nil }
+        return option.name
+    }
+
+    // Human-readable summary for the cart line description.
+    private func buildSummary() -> String {
+        var parts: [String] = []
+        for step in BurritoBuilder.steps {
+            let chosen = selections[step.key] ?? []
+            let names = step.options
+                .filter { chosen.contains($0.idKey) }
+                .map { $0.name }
+            if !names.isEmpty {
+                parts.append(names.joined(separator: ", "))
+            }
+        }
+        return parts.joined(separator: " · ")
     }
 }

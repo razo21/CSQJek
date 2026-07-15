@@ -112,6 +112,10 @@ struct Restaurant: Identifiable {
     let headerColor: Color
     let imageName: String          // Xcode asset name — empty = gradient fallback
     let menu: [MenuSection]
+    // Parody-demo flag (CSQ Burrito): when true, RestaurantDetailView surfaces the
+    // "Build Your Own Burrito" customizer above the menu. `var` w/ default so every
+    // existing Restaurant(...) call site is unchanged and only CSQ Burrito opts in.
+    var buildable: Bool = false
 
     static let sampleRestaurants: [Restaurant] = [
         Restaurant(
@@ -781,6 +785,46 @@ struct Restaurant: Identifiable {
     ]
 
     static let sydneyRestaurants: [Restaurant] = [
+        // ── CSQ Burrito ── parody Mexican QSR for the Guzman y Gomez demo.
+        // buildable: true surfaces the "Build Your Own Burrito" customizer.
+        Restaurant(
+            name: "CSQ Burrito",
+            cuisine: "Mexican · Burritos & Tacos",
+            category: .western,
+            rating: 4.9,
+            reviewCount: 14_820,
+            deliveryTime: "15–25 min",
+            deliveryFee: "Free",
+            minOrder: "A$12",
+            distance: "0.4 km",
+            promo: "Build Your Own",
+            headerColor: Color(hex: "#1FA463"),
+            imageName: "FoodCSQBurrito",
+            menu: [
+                MenuSection(name: "Signature Burritos", items: [
+                    MenuItem(name: "The Mega Burrito", description: "Double protein, rice, beans, cheese, guac & chipotle salsa", price: 18.90, isPopular: true, tag: "Bestseller", idKey: "burrito_mega"),
+                    MenuItem(name: "Classic Chicken Burrito", description: "Grilled chicken, rice, black beans, cheese & mild salsa", price: 14.90, isPopular: true, tag: "Popular", idKey: "burrito_chicken"),
+                    MenuItem(name: "Carnitas Burrito", description: "Slow-cooked pulled pork, pico de gallo & green salsa", price: 15.90, isPopular: false, tag: nil, idKey: "burrito_carnitas"),
+                    MenuItem(name: "Veggie Burrito", description: "Grilled veg, black beans, guac & corn salsa", price: 13.90, isPopular: false, tag: "Veg", idKey: "burrito_veggie")
+                ]),
+                MenuSection(name: "Tacos", items: [
+                    MenuItem(name: "Beef Soft Tacos (2pc)", description: "Slow-cooked beef, cheese, lettuce & chipotle", price: 12.90, isPopular: true, tag: "Bestseller", idKey: "taco_beef"),
+                    MenuItem(name: "Baja Fish Tacos (2pc)", description: "Battered fish, slaw & lime crema", price: 14.90, isPopular: false, tag: "New", idKey: "taco_fish"),
+                    MenuItem(name: "Chicken Tacos (2pc)", description: "Grilled chicken, pico & sour cream", price: 12.90, isPopular: false, tag: nil, idKey: "taco_chicken")
+                ]),
+                MenuSection(name: "Sides", items: [
+                    MenuItem(name: "Corn Chips & Guac", description: "Fresh guacamole with warm corn chips", price: 8.90, isPopular: true, tag: "Popular", idKey: "side_chips_guac"),
+                    MenuItem(name: "Loaded Nachos", description: "Cheese, jalapeños, beans, salsa & sour cream", price: 11.90, isPopular: true, tag: "Bestseller", idKey: "side_nachos"),
+                    MenuItem(name: "Churros (5pc)", description: "Cinnamon sugar with chocolate sauce", price: 7.90, isPopular: false, tag: nil, idKey: "side_churros")
+                ]),
+                MenuSection(name: "Drinks", items: [
+                    MenuItem(name: "Jarritos", description: "Mexican soda — lime, mandarin or guava", price: 4.90, isPopular: false, tag: nil, idKey: "drink_jarritos"),
+                    MenuItem(name: "Horchata", description: "Cinnamon rice milk", price: 5.50, isPopular: false, tag: "Popular", idKey: "drink_horchata"),
+                    MenuItem(name: "Soft Drink", description: "", price: 3.90, isPopular: false, tag: nil, idKey: "drink_soft")
+                ])
+            ],
+            buildable: true
+        ),
         Restaurant(
             name: "Bills Surry Hills",
             cuisine: "Brunch · Cafe",
@@ -1208,4 +1252,90 @@ class FoodCartStore: ObservableObject {
     var itemCount: Int {
         items.reduce(0) { $0 + $1.quantity }
     }
+}
+
+// MARK: - Build Your Own Burrito (CSQ Burrito parody demo)
+//
+// A single-screen customizer model powering the CSQ Burrito ordering-capabilities
+// demo. Each step emits its own `burrito_<object>_selected` event, so the whole
+// flow reads as a build funnel in Contentsquare:
+//   burrito_build_started → base → protein → salsa → (toppings/extras) → burrito_build_completed
+// Prices are Sydney-scale (AUD) numbers per the CLAUDE.md currency-scale convention —
+// raw values here; the view layer formats them with the market symbol.
+
+enum BurritoSelectionMode {
+    case single   // radio — exactly one choice
+    case multi    // checkbox — zero or more
+}
+
+struct BurritoOption: Identifiable {
+    let id: UUID = UUID()
+    let name: String          // user-visible label
+    let idKey: String         // stable analytics token — never localize
+    let priceDelta: Double    // extra cost in AUD; 0 = included
+    let tag: String?          // "Popular" / "Spicy" / "Veg" …
+
+    init(_ name: String, idKey: String, priceDelta: Double = 0, tag: String? = nil) {
+        self.name = name
+        self.idKey = idKey
+        self.priceDelta = priceDelta
+        self.tag = tag
+    }
+}
+
+struct BurritoStep: Identifiable {
+    let id: UUID = UUID()
+    let key: String            // analytics token: base/protein/salsa/toppings/extras
+    let title: String          // "Choose your base"
+    let subtitle: String       // helper line
+    let mode: BurritoSelectionMode
+    let required: Bool
+    let selectEvent: String    // event fired when an option in this step is chosen
+    let options: [BurritoOption]
+}
+
+enum BurritoBuilder {
+    /// Base price of a build (AUD); option deltas add on top.
+    static let basePrice: Double = 13.90
+
+    /// Steps whose selection is mandatory before "Add to Cart" enables.
+    static var requiredKeys: [String] { steps.filter { $0.required }.map { $0.key } }
+
+    static let steps: [BurritoStep] = [
+        BurritoStep(key: "base", title: "Choose your base", subtitle: "Pick one", mode: .single, required: true, selectEvent: "burrito_base_selected", options: [
+            BurritoOption("Flour Tortilla", idKey: "flour_tortilla"),
+            BurritoOption("Corn Tortilla (GF)", idKey: "corn_tortilla", tag: "GF"),
+            BurritoOption("Burrito Bowl", idKey: "burrito_bowl", tag: "Popular"),
+            BurritoOption("Naked (no base)", idKey: "naked")
+        ]),
+        BurritoStep(key: "protein", title: "Choose your protein", subtitle: "Pick one", mode: .single, required: true, selectEvent: "burrito_protein_selected", options: [
+            BurritoOption("Grilled Chicken", idKey: "chicken", tag: "Popular"),
+            BurritoOption("Slow-Cooked Beef", idKey: "beef", priceDelta: 2.00),
+            BurritoOption("Carnitas (Pulled Pork)", idKey: "carnitas", priceDelta: 2.00),
+            BurritoOption("Spicy Chorizo", idKey: "chorizo", priceDelta: 2.00, tag: "Spicy"),
+            BurritoOption("Grilled Veg", idKey: "veg", tag: "Veg"),
+            BurritoOption("Black Beans", idKey: "black_beans", tag: "Vegan")
+        ]),
+        BurritoStep(key: "salsa", title: "Pick your salsa", subtitle: "Choose your heat", mode: .single, required: true, selectEvent: "burrito_salsa_selected", options: [
+            BurritoOption("Mild Tomato", idKey: "mild_tomato"),
+            BurritoOption("Green Tomatillo", idKey: "green_tomatillo"),
+            BurritoOption("Chipotle", idKey: "chipotle", tag: "Spicy"),
+            BurritoOption("Fire-Roasted Habanero", idKey: "habanero", tag: "Extra Spicy")
+        ]),
+        BurritoStep(key: "toppings", title: "Add toppings", subtitle: "Choose as many as you like", mode: .multi, required: false, selectEvent: "burrito_topping_selected", options: [
+            BurritoOption("Cheese", idKey: "cheese"),
+            BurritoOption("Guacamole", idKey: "guac", priceDelta: 2.50, tag: "Popular"),
+            BurritoOption("Sour Cream", idKey: "sour_cream"),
+            BurritoOption("Jalapeños", idKey: "jalapenos", tag: "Spicy"),
+            BurritoOption("Pico de Gallo", idKey: "pico"),
+            BurritoOption("Corn Salsa", idKey: "corn_salsa"),
+            BurritoOption("Lettuce", idKey: "lettuce")
+        ]),
+        BurritoStep(key: "extras", title: "Make it a meal", subtitle: "Optional add-ons", mode: .multi, required: false, selectEvent: "burrito_extra_selected", options: [
+            BurritoOption("Corn Chips & Salsa", idKey: "chips_salsa", priceDelta: 4.00),
+            BurritoOption("Churros (5pc)", idKey: "churros", priceDelta: 5.00, tag: "Popular"),
+            BurritoOption("Regular Drink", idKey: "drink", priceDelta: 3.50),
+            BurritoOption("Upsize to Large", idKey: "upsize", priceDelta: 3.00)
+        ])
+    ]
 }
