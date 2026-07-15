@@ -116,6 +116,13 @@ struct Restaurant: Identifiable {
     // "Build Your Own Burrito" customizer above the menu. `var` w/ default so every
     // existing Restaurant(...) call site is unchanged and only CSQ Burrito opts in.
     var buildable: Bool = false
+    // Optional distinct image for the food-home list cards (featured / tile / row).
+    // Falls back to `imageName` when empty, so existing restaurants are unchanged.
+    // The wide hero shot rarely reads well cropped into the small square row.
+    var cardImageName: String = ""
+
+    // Asset used by the list cards — the dedicated card image if set, else the header image.
+    var cardImage: String { cardImageName.isEmpty ? imageName : cardImageName }
 
     static let sampleRestaurants: [Restaurant] = [
         // ── CSQ Burrito ── parody Mexican QSR, live in every market.
@@ -156,7 +163,8 @@ struct Restaurant: Identifiable {
                     MenuItem(name: "Soft Drink", description: "", price: 3.50, isPopular: false, tag: nil, idKey: "drink_soft")
                 ])
             ],
-            buildable: true
+            buildable: true,
+            cardImageName: "FoodCSQBurritoCard"
         ),
         Restaurant(
             name: "Lau Pa Sat",
@@ -623,7 +631,8 @@ struct Restaurant: Identifiable {
                     MenuItem(name: "ソフトドリンク", description: "", price: 390, isPopular: false, tag: nil, idKey: "drink_soft")
                 ])
             ],
-            buildable: true
+            buildable: true,
+            cardImageName: "FoodCSQBurritoCard"
         ),
         Restaurant(
             name: "一風堂",
@@ -904,7 +913,8 @@ struct Restaurant: Identifiable {
                     MenuItem(name: "Soft Drink", description: "", price: 3.90, isPopular: false, tag: nil, idKey: "drink_soft")
                 ])
             ],
-            buildable: true
+            buildable: true,
+            cardImageName: "FoodCSQBurritoCard"
         ),
         Restaurant(
             name: "Bills Surry Hills",

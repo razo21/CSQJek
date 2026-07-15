@@ -378,7 +378,7 @@ struct FeaturedRestaurantCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .bottomLeading) {
-                if !restaurant.imageName.isEmpty, let uiImg = UIImage(named: restaurant.imageName) {
+                if let uiImg = UIImage(named: restaurant.cardImage) ?? UIImage(named: restaurant.imageName) {
                     Image(uiImage: uiImg)
                         .resizable()
                         .scaledToFill()
@@ -457,7 +457,7 @@ struct RestaurantTileCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack {
-                if !restaurant.imageName.isEmpty, let uiImg = UIImage(named: restaurant.imageName) {
+                if let uiImg = UIImage(named: restaurant.cardImage) ?? UIImage(named: restaurant.imageName) {
                     Image(uiImage: uiImg)
                         .resizable()
                         .scaledToFill()
@@ -518,7 +518,7 @@ struct RestaurantRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Group {
-                if !restaurant.imageName.isEmpty, let uiImg = UIImage(named: restaurant.imageName) {
+                if let uiImg = UIImage(named: restaurant.cardImage) ?? UIImage(named: restaurant.imageName) {
                     Image(uiImage: uiImg)
                         .resizable()
                         .scaledToFill()
