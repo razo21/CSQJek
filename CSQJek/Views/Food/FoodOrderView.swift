@@ -213,43 +213,45 @@ struct FoodOrderView: View {
     // MARK: - Checkout Content
     private var checkoutContent: some View {
         VStack(spacing: 0) {
-            // Header
-            ZStack(alignment: .leading) {
+            // Header — content stays inside the safe area; only the gradient
+            // background bleeds up behind the status bar (keeps the title readable
+            // on notch / Dynamic Island devices).
+            HStack {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 38, height: 38)
+                        .background(Color.white.opacity(0.2))
+                        .clipShape(Circle())
+                }
+                .accessibilityIdentifier(OrderAccessID.backButton)
+
+                Spacer()
+
+                VStack(spacing: 2) {
+                    Text(marketConfig.strings.foodYourOrder)
+                        .font(AppFont.display(17))
+                        .foregroundColor(.white)
+                    Text(restaurant.name)
+                        .font(AppFont.body(12))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+
+                Spacer()
+                Color.clear.frame(width: 38, height: 38)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 14)
+            .frame(maxWidth: .infinity)
+            .background(
                 LinearGradient(
                     colors: [Color(hex: "#FF8C42"), Color(hex: "#E05A00")],
                     startPoint: .leading, endPoint: .trailing
                 )
-                .frame(height: 88)
                 .ignoresSafeArea(edges: .top)
-
-                HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 38, height: 38)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
-                    }
-                    .accessibilityIdentifier(OrderAccessID.backButton)
-                    .padding(.leading, 16)
-
-                    Spacer()
-
-                    VStack(spacing: 2) {
-                        Text(marketConfig.strings.foodYourOrder)
-                            .font(AppFont.display(17))
-                            .foregroundColor(.white)
-                        Text(restaurant.name)
-                            .font(AppFont.body(12))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-
-                    Spacer()
-                    Color.clear.frame(width: 38, height: 38).padding(.trailing, 16)
-                }
-                .padding(.top, 8)
-            }
+            )
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {

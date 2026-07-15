@@ -97,6 +97,8 @@ struct RestaurantDetailView: View {
                     Spacer()
                 }
 
+                Spacer()
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text(restaurant.name)
                         .font(.system(size: 24, weight: .bold))
@@ -176,8 +178,6 @@ struct RestaurantDetailView: View {
                         Spacer()
                     }
                 }
-
-                Spacer()
             }
             .padding(16)
         }
@@ -588,39 +588,41 @@ struct BurritoBuilderView: View {
     // MARK: Header
 
     private var header: some View {
-        ZStack {
+        // Content sits inside the safe area; only the gradient background bleeds
+        // up behind the status bar, so the title never collides with the notch.
+        HStack(spacing: 12) {
+            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#0E7A46"))
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(Color.white))
+            }
+            .accessibilityIdentifier(BurritoAccessID.closeButton)
+            .accessibilityLabel("Close burrito builder")
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(strings.builderTitle)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                Text(restaurant.name)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 14)
+        .frame(maxWidth: .infinity)
+        .background(
             LinearGradient(
                 gradient: Gradient(colors: [Color(hex: "#1FA463"), Color(hex: "#0E7A46")]),
                 startPoint: .topLeading, endPoint: .bottomTrailing
             )
-            .frame(height: 96)
             .ignoresSafeArea(edges: .top)
-
-            HStack(spacing: 12) {
-                Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(hex: "#0E7A46"))
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(Color.white))
-                }
-                .accessibilityIdentifier(BurritoAccessID.closeButton)
-                .accessibilityLabel("Close burrito builder")
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(strings.builderTitle)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.white)
-                    Text(restaurant.name)
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.white.opacity(0.9))
-                }
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-        }
-        .frame(height: 96)
+        )
     }
 
     // MARK: Step section
