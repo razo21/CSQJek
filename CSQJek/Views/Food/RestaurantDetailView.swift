@@ -523,6 +523,8 @@ struct BurritoBuilderView: View {
 
     // step.key → set of chosen option idKeys. Single-mode steps hold 0 or 1.
     @State private var selections: [String: Set<String>] = [:]
+    // Deterministic frustration signal for the deliberately-broken guac topping.
+    @State private var guacRage = RageTapDetector()
 
     private enum BurritoAccessID {
         static let closeButton = "burrito_builder_close"
@@ -712,6 +714,22 @@ struct BurritoBuilderView: View {
     // MARK: Selection logic
 
     private func toggle(_ step: BurritoStep, _ option: BurritoOption) {
+        // ⚠️ Deliberately-broken control (demo): the guacamole topping never
+        // registers — no checkbox, no selection captured, no price change — so a
+        // user hammers it. Every tap is still autocaptured (server-side rage), and
+        // once the burst crosses the threshold we fire a deterministic rage event.
+        if step.key == "toppings" && option.idKey == "guac" {
+            if let count = guacRage.registerTap() {
+                FrustrationSignal.burritoOptionRage(
+                    option: option.idKey,
+                    step: step.key,
+                    tapCount: count,
+                    market: market
+                )
+            }
+            return   // no toggle, no burrito_topping_selected event
+        }
+
         var chosen = selections[step.key] ?? []
 
         switch step.mode {

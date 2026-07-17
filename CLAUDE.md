@@ -365,6 +365,7 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 |------------|---------------|----------------|
 | `promo_rage_apply` | Coupon "Apply" hammered on an invalid code — shared across CSQRide (`ConfirmRideView`), CSQFood (`FoodOrderView`), CSQMart (`CartView`). Segment by `service`. | `service` (`CSQRide`/`CSQFood`/`CSQMart`), `screen`, `tap_count`, `failed_attempts`, `code_length` (length only — never the code), `market` |
 | `telco_payment_rage_retry` | A failing bill payment retried ≥3 times in `TelcoBillsView` | `invoice_no`, `tap_count`, `amount`, `method`, `market` |
+| `burrito_option_rage` | The deliberately-broken **guacamole** topping in the CSQ Burrito builder hammered ≥3 times (it never registers a selection — a demo dead-control that provokes rage clicks) | `option` (`guac`), `step` (`toppings`), `tap_count`, `market` |
 
 When adding events: fire them in the same action closure as the UI interaction. Never fire them in `.onAppear()` unless the event semantically is "screen viewed" (use `trackScreenview` for that instead).
 

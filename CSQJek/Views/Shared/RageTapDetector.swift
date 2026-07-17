@@ -80,6 +80,21 @@ enum FrustrationSignal {
         ])
     }
 
+    /// A deliberately-broken builder option (CSQ Burrito demo): the control never
+    /// registers, so the user hammers it. Fired once the taps cross the rage
+    /// threshold, in addition to the server-side rage the tap-stream generates.
+    static func burritoOptionRage(option: String,
+                                  step: String,
+                                  tapCount: Int,
+                                  market: Market) {
+        CSQ.trackEvent("burrito_option_rage", properties: [
+            "option":    option,          // stable idKey, e.g. "guac"
+            "step":      step,            // e.g. "toppings"
+            "tap_count": tapCount,        // taps in the rage burst
+            "market":    market.trackingLabel
+        ])
+    }
+
     /// A failing bill payment retried repeatedly — the CSQMobile rage-retry signal.
     static func paymentRageRetry(invoiceNo: String,
                                  tapCount: Int,
