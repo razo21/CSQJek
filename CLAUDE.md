@@ -143,6 +143,7 @@ This table reflects the actual `CSQ.trackScreenview(...)` calls in the code as o
 | `RestaurantDetailView.swift` | `"Food - Restaurant Menu"` | ✅ live |
 | `FoodOrderView.swift` (checkout) | `"Food - Checkout"` | ✅ live |
 | `OrderConfirmedView` (in FoodOrderView) | `"Food - Order Confirmed"` | ✅ live |
+| `RestaurantDetailView.swift` (BurritoBuilderView) | `"Burrito - Builder"` | ✅ live (CSQ Burrito parody demo — all markets, localized) |
 | `FoodDeliveryComingSoonView.swift` | `"Food - Coming Soon"` | legacy stub |
 | `TelcoHomeView.swift` | `"Telco - Home"` | ✅ live |
 | `TelcoPlanDetailView.swift` | `"Telco - Plan Detail"` | ✅ live |
@@ -290,6 +291,13 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `food_item_added` | Add-to-cart button in RestaurantDetailView | `item_name`, `price`, `restaurant` |
 | `food_order_placed` | Place Order button in FoodOrderView | `restaurant`, `item_count`, `total`, `delivery_fee` |
 | `food_track_order_tapped` | Track button in OrderConfirmedView | `restaurant` |
+| `burrito_build_started` | BurritoBuilderView appears (CSQ Burrito parody) | `restaurant`, `market` |
+| `burrito_base_selected` | Base option tap in the builder | `option`, `step`, `price_delta`, `market` |
+| `burrito_protein_selected` | Protein option tap in the builder | `option`, `step`, `price_delta`, `market` |
+| `burrito_salsa_selected` | Salsa option tap in the builder | `option`, `step`, `price_delta`, `market` |
+| `burrito_topping_selected` | Topping option tap (multi-select) in the builder | `option`, `step`, `price_delta`, `market` |
+| `burrito_extra_selected` | Extra / make-it-a-meal add-on tap (multi-select) | `option`, `step`, `price_delta`, `market` |
+| `burrito_build_completed` | "Add to Cart" in the builder — feeds the standard CSQFood checkout | `base`, `protein`, `salsa`, `topping_count`, `extra_count`, `total`, `market` |
 | `food_view_cart_tapped` | Floating cart bar tap in FoodHomeView | `item_count`, `subtotal`, `market` |
 | `telco_plan_viewed` | Plan card becomes visible in TelcoHomeView | `plan_name`, `plan_type`, `price` |
 | `telco_addon_tapped` | Add-on row tap in TelcoHomeView | `addon_name` |
@@ -556,6 +564,10 @@ TextField("Search...", text: $query)
 | **Food Checkout** | `food_order_btn_place_order` | Place Order button |
 | **Food Confirmed** | `food_confirm_btn_track` | Track My Order button |
 | **Food Confirmed** | `food_confirm_btn_done` | Back to CSQFood button |
+| **Restaurant Detail** | `restaurant_build_your_own_banner` | CSQ Burrito builder entry banner |
+| **Burrito Builder** | `burrito_builder_close` | Back/close nav |
+| **Burrito Builder** | `burrito_option_[step]_[option]` | Base/protein/salsa/topping/extra option row |
+| **Burrito Builder** | `burrito_builder_add_to_cart` | Primary CTA (adds build to cart) |
 | **Tabs** | `tab_home` | Tab item |
 | **Tabs** | `tab_rides` | Tab item |
 | **Tabs** | `tab_grocery` | Tab item |

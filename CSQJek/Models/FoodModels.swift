@@ -112,8 +112,60 @@ struct Restaurant: Identifiable {
     let headerColor: Color
     let imageName: String          // Xcode asset name — empty = gradient fallback
     let menu: [MenuSection]
+    // Parody-demo flag (CSQ Burrito): when true, RestaurantDetailView surfaces the
+    // "Build Your Own Burrito" customizer above the menu. `var` w/ default so every
+    // existing Restaurant(...) call site is unchanged and only CSQ Burrito opts in.
+    var buildable: Bool = false
+    // Optional distinct image for the food-home list cards (featured / tile / row).
+    // Falls back to `imageName` when empty, so existing restaurants are unchanged.
+    // The wide hero shot rarely reads well cropped into the small square row.
+    var cardImageName: String = ""
+
+    // Asset used by the list cards — the dedicated card image if set, else the header image.
+    var cardImage: String { cardImageName.isEmpty ? imageName : cardImageName }
 
     static let sampleRestaurants: [Restaurant] = [
+        // ── CSQ Burrito ── parody Mexican QSR, live in every market.
+        // buildable: true surfaces the "Build Your Own Burrito" customizer.
+        Restaurant(
+            name: "CSQ Burrito",
+            cuisine: "Mexican · Burritos & Tacos",
+            category: .western,
+            rating: 4.9,
+            reviewCount: 11_640,
+            deliveryTime: "15–25 min",
+            deliveryFee: "Free",
+            minOrder: "S$10",
+            distance: "0.5 km",
+            promo: "Build Your Own",
+            headerColor: Color(hex: "#1FA463"),
+            imageName: "FoodCSQBurrito",
+            menu: [
+                MenuSection(name: "Signature Burritos", items: [
+                    MenuItem(name: "The Mega Burrito", description: "Double protein, rice, beans, cheese, guac & chipotle salsa", price: 16.90, isPopular: true, tag: "Bestseller", idKey: "burrito_mega"),
+                    MenuItem(name: "Classic Chicken Burrito", description: "Grilled chicken, rice, black beans, cheese & mild salsa", price: 12.90, isPopular: true, tag: "Popular", idKey: "burrito_chicken"),
+                    MenuItem(name: "Rendang Beef Burrito", description: "Slow-cooked rendang beef, sambal & pico de gallo", price: 14.90, isPopular: true, tag: "Local", idKey: "burrito_rendang"),
+                    MenuItem(name: "Veggie Burrito", description: "Grilled veg, black beans, guac & corn salsa", price: 11.90, isPopular: false, tag: "Veg", idKey: "burrito_veggie")
+                ]),
+                MenuSection(name: "Tacos", items: [
+                    MenuItem(name: "Beef Soft Tacos (2pc)", description: "Slow-cooked beef, cheese, lettuce & chipotle", price: 11.90, isPopular: true, tag: "Bestseller", idKey: "taco_beef"),
+                    MenuItem(name: "Baja Fish Tacos (2pc)", description: "Battered fish, slaw & lime crema", price: 13.90, isPopular: false, tag: "New", idKey: "taco_fish"),
+                    MenuItem(name: "Chicken Tacos (2pc)", description: "Grilled chicken, pico & sour cream", price: 11.90, isPopular: false, tag: nil, idKey: "taco_chicken")
+                ]),
+                MenuSection(name: "Sides", items: [
+                    MenuItem(name: "Corn Chips & Guac", description: "Fresh guacamole with warm corn chips", price: 7.90, isPopular: true, tag: "Popular", idKey: "side_chips_guac"),
+                    MenuItem(name: "Loaded Nachos", description: "Cheese, jalapeños, beans, salsa & sour cream", price: 10.90, isPopular: true, tag: "Bestseller", idKey: "side_nachos"),
+                    MenuItem(name: "Churros (5pc)", description: "Cinnamon sugar with chocolate sauce", price: 6.90, isPopular: false, tag: nil, idKey: "side_churros")
+                ]),
+                MenuSection(name: "Drinks", items: [
+                    MenuItem(name: "Jarritos", description: "Mexican soda — lime, mandarin or guava", price: 4.50, isPopular: false, tag: nil, idKey: "drink_jarritos"),
+                    MenuItem(name: "Horchata", description: "Cinnamon rice milk", price: 4.90, isPopular: false, tag: "Popular", idKey: "drink_horchata"),
+                    MenuItem(name: "Soft Drink", description: "", price: 3.50, isPopular: false, tag: nil, idKey: "drink_soft")
+                ])
+            ],
+            buildable: true,
+            cardImageName: "FoodCSQBurritoCard"
+        ),
         Restaurant(
             name: "Lau Pa Sat",
             cuisine: "Hawker · Mixed",
@@ -540,6 +592,48 @@ struct Restaurant: Identifiable {
     ]
 
     static let tokyoRestaurants: [Restaurant] = [
+        // ── CSQブリトー ── パロディのメキシカンQSR（全都市で展開）。
+        // buildable: true で「オリジナルブリトー」カスタマイザーを表示。
+        Restaurant(
+            name: "CSQブリトー",
+            cuisine: "メキシカン · ブリトー＆タコス",
+            category: .western,
+            rating: 4.9,
+            reviewCount: 9_980,
+            deliveryTime: "15〜25分",
+            deliveryFee: "無料",
+            minOrder: "¥1,000",
+            distance: "0.4 km",
+            promo: "自分で作る",
+            headerColor: Color(hex: "#1FA463"),
+            imageName: "FoodCSQBurrito",
+            menu: [
+                MenuSection(name: "シグネチャーブリトー", items: [
+                    MenuItem(name: "メガブリトー", description: "ダブルプロテイン、ライス、豆、チーズ、ワカモレ、チポトレ", price: 1_680, isPopular: true, tag: "ベストセラー", idKey: "burrito_mega"),
+                    MenuItem(name: "クラシックチキンブリトー", description: "グリルチキン、ライス、ブラックビーンズ、チーズ、マイルドサルサ", price: 1_280, isPopular: true, tag: "人気", idKey: "burrito_chicken"),
+                    MenuItem(name: "照り焼きチキンブリトー", description: "照り焼きチキン、ライス、ネギ、明太マヨ", price: 1_380, isPopular: true, tag: "ご当地", idKey: "burrito_teriyaki"),
+                    MenuItem(name: "カルニタスブリトー", description: "スロークック豚、ピコ・デ・ガヨ、グリーンサルサ", price: 1_380, isPopular: false, tag: nil, idKey: "burrito_carnitas"),
+                    MenuItem(name: "ベジブリトー", description: "グリル野菜、ブラックビーンズ、ワカモレ、コーンサルサ", price: 1_180, isPopular: false, tag: "ベジ", idKey: "burrito_veggie")
+                ]),
+                MenuSection(name: "タコス", items: [
+                    MenuItem(name: "ビーフソフトタコス（2個）", description: "スロークックビーフ、チーズ、レタス、チポトレ", price: 1_180, isPopular: true, tag: "ベストセラー", idKey: "taco_beef"),
+                    MenuItem(name: "白身魚のバハタコス（2個）", description: "白身魚フライ、スロー、ライムクレマ", price: 1_380, isPopular: false, tag: "新作", idKey: "taco_fish"),
+                    MenuItem(name: "チキンタコス（2個）", description: "グリルチキン、ピコ、サワークリーム", price: 1_180, isPopular: false, tag: nil, idKey: "taco_chicken")
+                ]),
+                MenuSection(name: "サイド", items: [
+                    MenuItem(name: "コーンチップス＆ワカモレ", description: "自家製ワカモレと温かいコーンチップス", price: 780, isPopular: true, tag: "人気", idKey: "side_chips_guac"),
+                    MenuItem(name: "ロードナチョス", description: "チーズ、ハラペーニョ、豆、サルサ、サワークリーム", price: 1_080, isPopular: true, tag: "ベストセラー", idKey: "side_nachos"),
+                    MenuItem(name: "チュロス（5本）", description: "シナモンシュガー、チョコソース", price: 680, isPopular: false, tag: nil, idKey: "side_churros")
+                ]),
+                MenuSection(name: "ドリンク", items: [
+                    MenuItem(name: "メキシカンソーダ", description: "ライム・マンダリン・グアバ", price: 480, isPopular: false, tag: nil, idKey: "drink_jarritos"),
+                    MenuItem(name: "オルチャータ", description: "シナモンライスミルク", price: 550, isPopular: false, tag: "人気", idKey: "drink_horchata"),
+                    MenuItem(name: "ソフトドリンク", description: "", price: 390, isPopular: false, tag: nil, idKey: "drink_soft")
+                ])
+            ],
+            buildable: true,
+            cardImageName: "FoodCSQBurritoCard"
+        ),
         Restaurant(
             name: "一風堂",
             cuisine: "ラーメン · 博多豚骨",
@@ -781,6 +875,47 @@ struct Restaurant: Identifiable {
     ]
 
     static let sydneyRestaurants: [Restaurant] = [
+        // ── CSQ Burrito ── parody Mexican QSR for the Guzman y Gomez demo.
+        // buildable: true surfaces the "Build Your Own Burrito" customizer.
+        Restaurant(
+            name: "CSQ Burrito",
+            cuisine: "Mexican · Burritos & Tacos",
+            category: .western,
+            rating: 4.9,
+            reviewCount: 14_820,
+            deliveryTime: "15–25 min",
+            deliveryFee: "Free",
+            minOrder: "A$12",
+            distance: "0.4 km",
+            promo: "Build Your Own",
+            headerColor: Color(hex: "#1FA463"),
+            imageName: "FoodCSQBurrito",
+            menu: [
+                MenuSection(name: "Signature Burritos", items: [
+                    MenuItem(name: "The Mega Burrito", description: "Double protein, rice, beans, cheese, guac & chipotle salsa", price: 18.90, isPopular: true, tag: "Bestseller", idKey: "burrito_mega"),
+                    MenuItem(name: "Classic Chicken Burrito", description: "Grilled chicken, rice, black beans, cheese & mild salsa", price: 14.90, isPopular: true, tag: "Popular", idKey: "burrito_chicken"),
+                    MenuItem(name: "Carnitas Burrito", description: "Slow-cooked pulled pork, pico de gallo & green salsa", price: 15.90, isPopular: false, tag: nil, idKey: "burrito_carnitas"),
+                    MenuItem(name: "Veggie Burrito", description: "Grilled veg, black beans, guac & corn salsa", price: 13.90, isPopular: false, tag: "Veg", idKey: "burrito_veggie")
+                ]),
+                MenuSection(name: "Tacos", items: [
+                    MenuItem(name: "Beef Soft Tacos (2pc)", description: "Slow-cooked beef, cheese, lettuce & chipotle", price: 12.90, isPopular: true, tag: "Bestseller", idKey: "taco_beef"),
+                    MenuItem(name: "Baja Fish Tacos (2pc)", description: "Battered fish, slaw & lime crema", price: 14.90, isPopular: false, tag: "New", idKey: "taco_fish"),
+                    MenuItem(name: "Chicken Tacos (2pc)", description: "Grilled chicken, pico & sour cream", price: 12.90, isPopular: false, tag: nil, idKey: "taco_chicken")
+                ]),
+                MenuSection(name: "Sides", items: [
+                    MenuItem(name: "Corn Chips & Guac", description: "Fresh guacamole with warm corn chips", price: 8.90, isPopular: true, tag: "Popular", idKey: "side_chips_guac"),
+                    MenuItem(name: "Loaded Nachos", description: "Cheese, jalapeños, beans, salsa & sour cream", price: 11.90, isPopular: true, tag: "Bestseller", idKey: "side_nachos"),
+                    MenuItem(name: "Churros (5pc)", description: "Cinnamon sugar with chocolate sauce", price: 7.90, isPopular: false, tag: nil, idKey: "side_churros")
+                ]),
+                MenuSection(name: "Drinks", items: [
+                    MenuItem(name: "Jarritos", description: "Mexican soda — lime, mandarin or guava", price: 4.90, isPopular: false, tag: nil, idKey: "drink_jarritos"),
+                    MenuItem(name: "Horchata", description: "Cinnamon rice milk", price: 5.50, isPopular: false, tag: "Popular", idKey: "drink_horchata"),
+                    MenuItem(name: "Soft Drink", description: "", price: 3.90, isPopular: false, tag: nil, idKey: "drink_soft")
+                ])
+            ],
+            buildable: true,
+            cardImageName: "FoodCSQBurritoCard"
+        ),
         Restaurant(
             name: "Bills Surry Hills",
             cuisine: "Brunch · Cafe",
@@ -1208,4 +1343,228 @@ class FoodCartStore: ObservableObject {
     var itemCount: Int {
         items.reduce(0) { $0 + $1.quantity }
     }
+}
+
+// MARK: - Build Your Own Burrito (CSQ Burrito parody demo)
+//
+// A single-screen customizer model powering the CSQ Burrito ordering-capabilities
+// demo. Each step emits its own `burrito_<object>_selected` event, so the whole
+// flow reads as a build funnel in Contentsquare:
+//   burrito_build_started → base → protein → salsa → (toppings/extras) → burrito_build_completed
+// Prices are Sydney-scale (AUD) numbers per the CLAUDE.md currency-scale convention —
+// raw values here; the view layer formats them with the market symbol.
+
+enum BurritoSelectionMode {
+    case single   // radio — exactly one choice
+    case multi    // checkbox — zero or more
+}
+
+struct BurritoOption: Identifiable {
+    let id: UUID = UUID()
+    let name: String          // user-visible label
+    let idKey: String         // stable analytics token — never localize
+    let priceDelta: Double    // extra cost in AUD; 0 = included
+    let tag: String?          // "Popular" / "Spicy" / "Veg" …
+
+    init(_ name: String, idKey: String, priceDelta: Double = 0, tag: String? = nil) {
+        self.name = name
+        self.idKey = idKey
+        self.priceDelta = priceDelta
+        self.tag = tag
+    }
+}
+
+struct BurritoStep: Identifiable {
+    let id: UUID = UUID()
+    let key: String            // analytics token: base/protein/salsa/toppings/extras
+    let title: String          // "Choose your base"
+    let subtitle: String       // helper line
+    let mode: BurritoSelectionMode
+    let required: Bool
+    let selectEvent: String    // event fired when an option in this step is chosen
+    let options: [BurritoOption]
+}
+
+// Localized UI copy for the builder chrome (title, CTA, badges). Stable analytics
+// tokens (event names, option idKeys) never change; only these display strings do.
+struct BurritoStrings {
+    let builderTitle: String
+    let bannerTitle: String
+    let bannerSubtitle: String
+    let requiredBadge: String
+    let addToCart: String
+    let addToCartLocked: String
+    let cartNamePrefix: String
+}
+
+// Market-aware customizer data. Every market shares the same step keys, select
+// events and option idKeys (so the build funnel compares cleanly across cities),
+// but display names, tags, UI copy and prices are localized. Prices are in each
+// market's real local scale (SGD/AUD ~tens, JPY ~thousands) matching how the rest
+// of the CSQFood menu is priced — the view formats them with the market symbol.
+enum BurritoBuilder {
+    /// Base price of a build in the market's local currency scale.
+    static func basePrice(for market: Market) -> Double {
+        market == .tokyo ? 1200 : 13.90
+    }
+
+    /// Steps whose selection is mandatory before "Add to Cart" enables.
+    static func requiredKeys(for market: Market) -> [String] {
+        steps(for: market).filter { $0.required }.map { $0.key }
+    }
+
+    static func steps(for market: Market) -> [BurritoStep] {
+        switch market {
+        case .tokyo:     return tokyoSteps
+        case .singapore: return singaporeSteps
+        case .sydney:    return sydneySteps
+        }
+    }
+
+    static func strings(for market: Market) -> BurritoStrings {
+        switch market {
+        case .tokyo:
+            return BurritoStrings(
+                builderTitle:    "オリジナルブリトー",
+                bannerTitle:     "オリジナルブリトーを作る",
+                bannerSubtitle:  "ベース・プロテイン・サルサ・トッピングを自由に",
+                requiredBadge:   "必須",
+                addToCart:       "カートに追加",
+                addToCartLocked: "ベース・プロテイン・サルサを選択",
+                cartNamePrefix:  "オリジナルブリトー"
+            )
+        default: // Singapore & Sydney share English copy.
+            return BurritoStrings(
+                builderTitle:    "Build Your Own Burrito",
+                bannerTitle:     "Build Your Own Burrito",
+                bannerSubtitle:  "Base · protein · salsa · toppings — your way",
+                requiredBadge:   "Required",
+                addToCart:       "Add to Cart",
+                addToCartLocked: "Choose base, protein & salsa",
+                cartNamePrefix:  "Build Your Own Burrito"
+            )
+        }
+    }
+
+    // MARK: Sydney (English · AUD) — the classic set, with an Aussie beetroot nod
+    private static let sydneySteps: [BurritoStep] = [
+        BurritoStep(key: "base", title: "Choose your base", subtitle: "Pick one", mode: .single, required: true, selectEvent: "burrito_base_selected", options: [
+            BurritoOption("Flour Tortilla", idKey: "flour_tortilla"),
+            BurritoOption("Corn Tortilla (GF)", idKey: "corn_tortilla", tag: "GF"),
+            BurritoOption("Burrito Bowl", idKey: "burrito_bowl", tag: "Popular"),
+            BurritoOption("Naked (no base)", idKey: "naked")
+        ]),
+        BurritoStep(key: "protein", title: "Choose your protein", subtitle: "Pick one", mode: .single, required: true, selectEvent: "burrito_protein_selected", options: [
+            BurritoOption("Grilled Chicken", idKey: "chicken", tag: "Popular"),
+            BurritoOption("Slow-Cooked Beef", idKey: "beef", priceDelta: 2.00),
+            BurritoOption("Carnitas (Pulled Pork)", idKey: "carnitas", priceDelta: 2.00),
+            BurritoOption("Spicy Chorizo", idKey: "chorizo", priceDelta: 2.00, tag: "Spicy"),
+            BurritoOption("Grilled Veg", idKey: "veg", tag: "Veg"),
+            BurritoOption("Black Beans", idKey: "black_beans", tag: "Vegan")
+        ]),
+        BurritoStep(key: "salsa", title: "Pick your salsa", subtitle: "Choose your heat", mode: .single, required: true, selectEvent: "burrito_salsa_selected", options: [
+            BurritoOption("Mild Tomato", idKey: "mild_tomato"),
+            BurritoOption("Green Tomatillo", idKey: "green_tomatillo"),
+            BurritoOption("Chipotle", idKey: "chipotle", tag: "Spicy"),
+            BurritoOption("Fire-Roasted Habanero", idKey: "habanero", tag: "Extra Spicy")
+        ]),
+        BurritoStep(key: "toppings", title: "Add toppings", subtitle: "Choose as many as you like", mode: .multi, required: false, selectEvent: "burrito_topping_selected", options: [
+            BurritoOption("Cheese", idKey: "cheese"),
+            BurritoOption("Guacamole", idKey: "guac", priceDelta: 2.50, tag: "Popular"),
+            BurritoOption("Sour Cream", idKey: "sour_cream"),
+            BurritoOption("Jalapeños", idKey: "jalapenos", tag: "Spicy"),
+            BurritoOption("Pico de Gallo", idKey: "pico"),
+            BurritoOption("Corn Salsa", idKey: "corn_salsa"),
+            BurritoOption("Lettuce", idKey: "lettuce"),
+            BurritoOption("Beetroot Relish", idKey: "beetroot", tag: "Aussie")
+        ]),
+        BurritoStep(key: "extras", title: "Make it a meal", subtitle: "Optional add-ons", mode: .multi, required: false, selectEvent: "burrito_extra_selected", options: [
+            BurritoOption("Corn Chips & Salsa", idKey: "chips_salsa", priceDelta: 4.00),
+            BurritoOption("Churros (5pc)", idKey: "churros", priceDelta: 5.00, tag: "Popular"),
+            BurritoOption("Regular Drink", idKey: "drink", priceDelta: 3.50),
+            BurritoOption("Upsize to Large", idKey: "upsize", priceDelta: 3.00)
+        ])
+    ]
+
+    // MARK: Singapore (English · SGD) — classic set + local Rendang & Sambal heat
+    private static let singaporeSteps: [BurritoStep] = [
+        BurritoStep(key: "base", title: "Choose your base", subtitle: "Pick one", mode: .single, required: true, selectEvent: "burrito_base_selected", options: [
+            BurritoOption("Flour Tortilla", idKey: "flour_tortilla"),
+            BurritoOption("Corn Tortilla (GF)", idKey: "corn_tortilla", tag: "GF"),
+            BurritoOption("Burrito Bowl", idKey: "burrito_bowl", tag: "Popular"),
+            BurritoOption("Naked (no base)", idKey: "naked")
+        ]),
+        BurritoStep(key: "protein", title: "Choose your protein", subtitle: "Pick one", mode: .single, required: true, selectEvent: "burrito_protein_selected", options: [
+            BurritoOption("Grilled Chicken", idKey: "chicken", tag: "Popular"),
+            BurritoOption("Rendang Beef", idKey: "rendang", priceDelta: 2.00, tag: "Local"),
+            BurritoOption("Slow-Cooked Beef", idKey: "beef", priceDelta: 2.00),
+            BurritoOption("Carnitas (Pulled Pork)", idKey: "carnitas", priceDelta: 2.00),
+            BurritoOption("Spicy Chorizo", idKey: "chorizo", priceDelta: 2.00, tag: "Spicy"),
+            BurritoOption("Grilled Veg", idKey: "veg", tag: "Veg"),
+            BurritoOption("Black Beans", idKey: "black_beans", tag: "Vegan")
+        ]),
+        BurritoStep(key: "salsa", title: "Pick your salsa", subtitle: "Choose your heat", mode: .single, required: true, selectEvent: "burrito_salsa_selected", options: [
+            BurritoOption("Mild Tomato", idKey: "mild_tomato"),
+            BurritoOption("Green Tomatillo", idKey: "green_tomatillo"),
+            BurritoOption("Chipotle", idKey: "chipotle", tag: "Spicy"),
+            BurritoOption("Fire-Roasted Habanero", idKey: "habanero", tag: "Extra Spicy")
+        ]),
+        BurritoStep(key: "toppings", title: "Add toppings", subtitle: "Choose as many as you like", mode: .multi, required: false, selectEvent: "burrito_topping_selected", options: [
+            BurritoOption("Cheese", idKey: "cheese"),
+            BurritoOption("Guacamole", idKey: "guac", priceDelta: 2.50, tag: "Popular"),
+            BurritoOption("Sambal Chilli", idKey: "sambal", tag: "Local"),
+            BurritoOption("Sour Cream", idKey: "sour_cream"),
+            BurritoOption("Jalapeños", idKey: "jalapenos", tag: "Spicy"),
+            BurritoOption("Pico de Gallo", idKey: "pico"),
+            BurritoOption("Corn Salsa", idKey: "corn_salsa"),
+            BurritoOption("Lettuce", idKey: "lettuce")
+        ]),
+        BurritoStep(key: "extras", title: "Make it a meal", subtitle: "Optional add-ons", mode: .multi, required: false, selectEvent: "burrito_extra_selected", options: [
+            BurritoOption("Corn Chips & Salsa", idKey: "chips_salsa", priceDelta: 4.00),
+            BurritoOption("Churros (5pc)", idKey: "churros", priceDelta: 5.00, tag: "Popular"),
+            BurritoOption("Regular Drink", idKey: "drink", priceDelta: 3.50),
+            BurritoOption("Upsize to Large", idKey: "upsize", priceDelta: 3.00)
+        ])
+    ]
+
+    // MARK: Tokyo (日本語 · JPY) — Japanese throughout + local 唐揚げ & 明太マヨ
+    private static let tokyoSteps: [BurritoStep] = [
+        BurritoStep(key: "base", title: "ベースを選ぶ", subtitle: "1つ選択", mode: .single, required: true, selectEvent: "burrito_base_selected", options: [
+            BurritoOption("フラワートルティーヤ", idKey: "flour_tortilla"),
+            BurritoOption("コーントルティーヤ（GF）", idKey: "corn_tortilla", tag: "GF"),
+            BurritoOption("ブリトーボウル", idKey: "burrito_bowl", tag: "人気"),
+            BurritoOption("ライスなし", idKey: "naked")
+        ]),
+        BurritoStep(key: "protein", title: "プロテインを選ぶ", subtitle: "1つ選択", mode: .single, required: true, selectEvent: "burrito_protein_selected", options: [
+            BurritoOption("グリルチキン", idKey: "chicken", tag: "人気"),
+            BurritoOption("唐揚げ", idKey: "karaage", priceDelta: 200, tag: "ご当地"),
+            BurritoOption("煮込みビーフ", idKey: "beef", priceDelta: 200),
+            BurritoOption("カルニタス（豚）", idKey: "carnitas", priceDelta: 200),
+            BurritoOption("スパイシーチョリソ", idKey: "chorizo", priceDelta: 200, tag: "辛口"),
+            BurritoOption("グリル野菜", idKey: "veg", tag: "ベジ"),
+            BurritoOption("ブラックビーンズ", idKey: "black_beans", tag: "ヴィーガン")
+        ]),
+        BurritoStep(key: "salsa", title: "サルサを選ぶ", subtitle: "辛さを選択", mode: .single, required: true, selectEvent: "burrito_salsa_selected", options: [
+            BurritoOption("マイルドトマト", idKey: "mild_tomato"),
+            BurritoOption("グリーントマティーヨ", idKey: "green_tomatillo"),
+            BurritoOption("チポトレ", idKey: "chipotle", tag: "辛口"),
+            BurritoOption("焼きハバネロ", idKey: "habanero", tag: "激辛")
+        ]),
+        BurritoStep(key: "toppings", title: "トッピングを追加", subtitle: "いくつでも選択可", mode: .multi, required: false, selectEvent: "burrito_topping_selected", options: [
+            BurritoOption("チーズ", idKey: "cheese"),
+            BurritoOption("ワカモレ", idKey: "guac", priceDelta: 250, tag: "人気"),
+            BurritoOption("明太マヨ", idKey: "mentaiko", tag: "ご当地"),
+            BurritoOption("サワークリーム", idKey: "sour_cream"),
+            BurritoOption("ハラペーニョ", idKey: "jalapenos", tag: "辛口"),
+            BurritoOption("ピコ・デ・ガヨ", idKey: "pico"),
+            BurritoOption("コーンサルサ", idKey: "corn_salsa"),
+            BurritoOption("レタス", idKey: "lettuce")
+        ]),
+        BurritoStep(key: "extras", title: "セットにする", subtitle: "追加オプション", mode: .multi, required: false, selectEvent: "burrito_extra_selected", options: [
+            BurritoOption("コーンチップス＆サルサ", idKey: "chips_salsa", priceDelta: 400),
+            BurritoOption("チュロス（5本）", idKey: "churros", priceDelta: 500, tag: "人気"),
+            BurritoOption("ドリンク", idKey: "drink", priceDelta: 350),
+            BurritoOption("ラージにアップサイズ", idKey: "upsize", priceDelta: 300)
+        ])
+    ]
 }
