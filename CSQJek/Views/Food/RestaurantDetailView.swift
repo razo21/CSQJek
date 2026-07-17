@@ -59,128 +59,130 @@ struct RestaurantDetailView: View {
     }
 
     private var headerView: some View {
-        ZStack(alignment: .topLeading) {
-            // Photo or gradient fallback
-            if !restaurant.imageName.isEmpty, let uiImg = UIImage(named: restaurant.imageName) {
-                Image(uiImage: uiImg)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 220)
-                    .clipped()
-            } else {
-                LinearGradient(
-                    gradient: Gradient(colors: [restaurant.headerColor, Color.black.opacity(0.85)]),
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                )
-                .frame(height: 220)
-            }
-            // Always overlay a scrim so text stays readable over any photo
-            LinearGradient(
-                colors: [Color.black.opacity(0.25), Color.black.opacity(0.65)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .frame(height: 220)
+        // The info sits ON the photo over a dark scrim. The image is a clipped
+        // background sized to the header, and the content uses minHeight so the
+        // text can never overflow onto the page background (the earlier bug:
+        // white text spilling below a fixed-height photo onto the cream page).
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(hex: "#1C1C2E"))
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(Color.white))
+                        .shadow(color: .black.opacity(0.18), radius: 4, x: 0, y: 2)
+                }
+                .accessibilityIdentifier(RestaurantAccessID.backButton)
 
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(hex: "#1C1C2E"))
-                            .frame(width: 36, height: 36)
-                            .background(Circle().fill(Color.white))
-                            .shadow(color: .black.opacity(0.18), radius: 4, x: 0, y: 2)
+                Spacer()
+            }
+
+            Spacer(minLength: 30)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(restaurant.name)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.35), radius: 3, x: 0, y: 1)
+
+                HStack(spacing: 8) {
+                    Text(restaurant.cuisine)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Color.black.opacity(0.35))
+                        .cornerRadius(4)
+                }
+
+                HStack(spacing: 16) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(hex: "#F59E0B"))
+
+                        Text(String(format: "%.1f", restaurant.rating))
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+
+                        Text("(\(restaurant.reviewCount) \(marketConfig.strings.productReviewsCount))")
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(.white.opacity(0.85))
                     }
-                    .accessibilityIdentifier(RestaurantAccessID.backButton)
 
                     Spacer()
                 }
+                .shadow(color: .black.opacity(0.35), radius: 3, x: 0, y: 1)
 
-                Spacer()
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(restaurant.name)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white)
-
-                    HStack(spacing: 8) {
-                        Text(restaurant.cuisine)
-                            .font(.system(size: 12, weight: .semibold))
+                HStack(spacing: 12) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 10))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(4)
+
+                        Text(restaurant.deliveryTime)
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(.white)
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(4)
 
-                    HStack(spacing: 16) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "star.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(hex: "#F59E0B"))
+                    HStack(spacing: 4) {
+                        Image(systemName: "truck.box")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white)
 
-                            Text(String(format: "%.1f", restaurant.rating))
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white)
-
-                            Text("(\(restaurant.reviewCount) \(marketConfig.strings.productReviewsCount))")
-                                .font(.system(size: 11, weight: .regular))
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-
-                        Spacer()
+                        Text(restaurant.deliveryFee)
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(.white)
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(4)
 
-                    HStack(spacing: 12) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock")
-                                .font(.system(size: 10))
-                                .foregroundColor(.white)
+                    HStack(spacing: 4) {
+                        Image(systemName: "tag")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white)
 
-                            Text(restaurant.deliveryTime)
-                                .font(.system(size: 11, weight: .regular))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(Color.white.opacity(0.15))
-                        .cornerRadius(4)
-
-                        HStack(spacing: 4) {
-                            Image(systemName: "truck.box")
-                                .font(.system(size: 10))
-                                .foregroundColor(.white)
-
-                            Text(restaurant.deliveryFee)
-                                .font(.system(size: 11, weight: .regular))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(Color.white.opacity(0.15))
-                        .cornerRadius(4)
-
-                        HStack(spacing: 4) {
-                            Image(systemName: "tag")
-                                .font(.system(size: 10))
-                                .foregroundColor(.white)
-
-                            Text(restaurant.minOrder)
-                                .font(.system(size: 11, weight: .regular))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(Color.white.opacity(0.15))
-                        .cornerRadius(4)
-
-                        Spacer()
+                        Text(restaurant.minOrder)
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(.white)
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(4)
+
+                    Spacer()
                 }
             }
-            .padding(16)
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 240, alignment: .topLeading)
+        .background(
+            ZStack {
+                if !restaurant.imageName.isEmpty, let uiImg = UIImage(named: restaurant.imageName) {
+                    Image(uiImage: uiImg)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    LinearGradient(
+                        gradient: Gradient(colors: [restaurant.headerColor, Color.black.opacity(0.85)]),
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                }
+                LinearGradient(
+                    colors: [Color.black.opacity(0.15), Color.black.opacity(0.7)],
+                    startPoint: .top, endPoint: .bottom
+                )
+            }
+        )
+        .clipped()
     }
 
     private var categoryTabBar: some View {
