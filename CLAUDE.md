@@ -566,9 +566,14 @@ TextField("Search...", text: $query)
 | **Food Confirmed** | `food_confirm_btn_track` | Track My Order button |
 | **Food Confirmed** | `food_confirm_btn_done` | Back to CSQFood button |
 | **Restaurant Detail** | `restaurant_build_your_own_banner` | CSQ Burrito builder entry banner |
+| **Restaurant Detail** | `restaurant_label_name` / `_cuisine` / `_rating` | Header display labels (DXA zoning) |
+| **Restaurant Detail** | `restaurant_label_delivery_time` / `_delivery_fee` / `_min_order` | Header stat badges (DXA zoning) |
 | **Burrito Builder** | `burrito_builder_close` | Back/close nav |
 | **Burrito Builder** | `burrito_option_[step]_[option]` | Base/protein/salsa/topping/extra option row |
 | **Burrito Builder** | `burrito_builder_add_to_cart` | Primary CTA (adds build to cart) |
+| **Burrito Builder** | `burrito_label_title` / `burrito_label_restaurant` | Header display labels (DXA zoning) |
+| **Burrito Builder** | `burrito_label_step_title_[step]` | Per-step heading (base/protein/salsa/toppings/extras) |
+| **Burrito Builder** | `burrito_label_step_hint_[step]` / `burrito_label_step_required_[step]` | Per-step subtitle + required badge |
 | **Tabs** | `tab_home` | Tab item |
 | **Tabs** | `tab_rides` | Tab item |
 | **Tabs** | `tab_grocery` | Tab item |

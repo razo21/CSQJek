@@ -17,6 +17,14 @@ struct RestaurantDetailView: View {
         static func categoryTab(_ index: Int) -> String { "restaurant_category_tab_\(index)" }
         static func itemRow(_ itemId: UUID) -> String { "restaurant_item_\(itemId)" }
         static func addButton(_ itemId: UUID) -> String { "restaurant_add_\(itemId)" }
+        // Display-only header elements — labeled so CS can name them for
+        // DXA zoning / heatmaps (not interactive, so no accessibilityLabel).
+        static let headerName = "restaurant_label_name"
+        static let headerCuisine = "restaurant_label_cuisine"
+        static let headerRating = "restaurant_label_rating"
+        static let headerDeliveryTime = "restaurant_label_delivery_time"
+        static let headerDeliveryFee = "restaurant_label_delivery_fee"
+        static let headerMinOrder = "restaurant_label_min_order"
     }
 
     var body: some View {
@@ -85,6 +93,7 @@ struct RestaurantDetailView: View {
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.35), radius: 3, x: 0, y: 1)
+                    .accessibilityIdentifier(RestaurantAccessID.headerName)
 
                 HStack(spacing: 8) {
                     Text(restaurant.cuisine)
@@ -95,6 +104,7 @@ struct RestaurantDetailView: View {
                         .background(Color.black.opacity(0.35))
                         .cornerRadius(4)
                 }
+                .accessibilityIdentifier(RestaurantAccessID.headerCuisine)
 
                 HStack(spacing: 16) {
                     HStack(spacing: 4) {
@@ -110,6 +120,7 @@ struct RestaurantDetailView: View {
                             .font(.system(size: 11, weight: .regular))
                             .foregroundColor(.white.opacity(0.85))
                     }
+                    .accessibilityIdentifier(RestaurantAccessID.headerRating)
 
                     Spacer()
                 }
@@ -129,6 +140,7 @@ struct RestaurantDetailView: View {
                     .padding(.vertical, 5)
                     .background(Color.black.opacity(0.3))
                     .cornerRadius(4)
+                    .accessibilityIdentifier(RestaurantAccessID.headerDeliveryTime)
 
                     HStack(spacing: 4) {
                         Image(systemName: "truck.box")
@@ -143,6 +155,7 @@ struct RestaurantDetailView: View {
                     .padding(.vertical, 5)
                     .background(Color.black.opacity(0.3))
                     .cornerRadius(4)
+                    .accessibilityIdentifier(RestaurantAccessID.headerDeliveryFee)
 
                     HStack(spacing: 4) {
                         Image(systemName: "tag")
@@ -157,6 +170,7 @@ struct RestaurantDetailView: View {
                     .padding(.vertical, 5)
                     .background(Color.black.opacity(0.3))
                     .cornerRadius(4)
+                    .accessibilityIdentifier(RestaurantAccessID.headerMinOrder)
 
                     Spacer()
                 }
@@ -532,6 +546,14 @@ struct BurritoBuilderView: View {
         static func option(_ stepKey: String, _ optionKey: String) -> String {
             "burrito_option_\(stepKey)_\(optionKey)"
         }
+        // Display-only elements — labeled for CS naming / DXA zoning. stepKey is a
+        // stable analytics token (base/protein/salsa/toppings/extras), so these
+        // ids are stable and unique per step.
+        static let headerTitle = "burrito_label_title"
+        static let headerRestaurant = "burrito_label_restaurant"
+        static func stepTitle(_ stepKey: String) -> String { "burrito_label_step_title_\(stepKey)" }
+        static func stepHint(_ stepKey: String) -> String { "burrito_label_step_hint_\(stepKey)" }
+        static func stepRequired(_ stepKey: String) -> String { "burrito_label_step_required_\(stepKey)" }
     }
 
     // MARK: Derived state
@@ -609,9 +631,11 @@ struct BurritoBuilderView: View {
                 Text(strings.builderTitle)
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
+                    .accessibilityIdentifier(BurritoAccessID.headerTitle)
                 Text(restaurant.name)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.white.opacity(0.9))
+                    .accessibilityIdentifier(BurritoAccessID.headerRestaurant)
             }
 
             Spacer()
@@ -637,6 +661,7 @@ struct BurritoBuilderView: View {
                 Text(step.title)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(Color(hex: "#1C1C2E"))
+                    .accessibilityIdentifier(BurritoAccessID.stepTitle(step.key))
 
                 if step.required {
                     Text(strings.requiredBadge)
@@ -645,6 +670,7 @@ struct BurritoBuilderView: View {
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Color(hex: "#DCFCE7"))
                         .cornerRadius(3)
+                        .accessibilityIdentifier(BurritoAccessID.stepRequired(step.key))
                 }
 
                 Spacer()
@@ -652,6 +678,7 @@ struct BurritoBuilderView: View {
                 Text(step.subtitle)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundColor(Color(hex: "#6B7280"))
+                    .accessibilityIdentifier(BurritoAccessID.stepHint(step.key))
             }
 
             VStack(spacing: 8) {
