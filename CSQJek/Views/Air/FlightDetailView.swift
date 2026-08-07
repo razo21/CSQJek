@@ -550,6 +550,9 @@ struct AirReviewPayView: View {
     @State private var promoFailed   = false
     @State private var promoFailures = 0
     @State private var promoRage     = RageTapDetector()
+    @State private var selectedCard  : AirCard = .visa
+    @State private var isPaying      = false
+    @State private var paymentError  : String? = nil
 
     private let airBlue = Color(hex: "#1B3FAB")
 
@@ -558,6 +561,8 @@ struct AirReviewPayView: View {
         static let promoInput  = "air_review_input_promo"
         static let promoApply  = "air_review_btn_apply_promo"
         static let confirmPay  = "air_review_btn_confirm_pay"
+        static let paymentError = "air_review_payment_error_banner"
+        static func card(_ token: String) -> String { "air_review_card_\(token)" }
     }
 
     // Tiny inline localizer — English (SG / Sydney) vs 日本語 (Tokyo).
@@ -588,6 +593,8 @@ struct AirReviewPayView: View {
                     tripSummary
                     priceSummary
                     promoCard
+                    paymentCard
+                    if let err = paymentError { paymentErrorBanner(err) }
                     Spacer(minLength: 110)
                 }
                 .padding(.horizontal, 16)
@@ -802,6 +809,82 @@ struct AirReviewPayView: View {
         }
     }
 
+    // MARK: Payment method
+    private var paymentCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(t("Payment method", "お支払い方法"))
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.csqTextPrimary)
+
+            VStack(spacing: 8) {
+                ForEach(AirCard.allCases) { card in
+                    Button { selectCard(card) } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "creditcard.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(card.brandColor)
+                                .frame(width: 26)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(card.displayName)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.csqTextPrimary)
+                                Text("•••• \(card.last4)")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.csqTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: selectedCard == card ? "largecircle.fill.circle" : "circle")
+                                .font(.system(size: 18))
+                                .foregroundColor(selectedCard == card ? airBlue : Color(hex: "#C4C4C4"))
+                        }
+                        .padding(12)
+                        .background(Color.csqBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(selectedCard == card ? airBlue : Color.csqBorder,
+                                        lineWidth: selectedCard == card ? 1.5 : 1)
+                        )
+                    }
+                    .accessibilityIdentifier(ReviewAccessID.card(card.token))
+                    .accessibilityLabel(card.displayName)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.csqSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.07), radius: 8, x: 0, y: 3)
+    }
+
+    private func selectCard(_ card: AirCard) {
+        selectedCard = card
+        paymentError = nil
+        CSQ.trackEvent("air_payment_method_selected", properties: [
+            "method": card.token,
+            "market": marketConfig.market.trackingLabel
+        ])
+    }
+
+    private func paymentErrorBanner(_ message: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.octagon.fill")
+                .font(.system(size: 16))
+                .foregroundColor(.csqError)
+            Text(message)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.csqError)
+            Spacer()
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.csqError.opacity(0.10))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityIdentifier(ReviewAccessID.paymentError)
+        .accessibilityLabel("Payment error: \(message)")
+    }
+
     // MARK: Confirm & Pay
     private var confirmBar: some View {
         VStack(spacing: 0) {
@@ -817,30 +900,93 @@ struct AirReviewPayView: View {
                 }
                 Spacer()
                 Button {
-                    CSQ.trackEvent("air_review_pay_tapped", properties: [
-                        "route":       "\(flight.origin.code)-\(flight.destination.code)",
-                        "final_price": finalTotal,
-                        "market":      marketConfig.market.trackingLabel
-                    ])
-                    showBooking = true
-                } label: {
-                    Text(t("Confirm & Pay", "確認して支払う"))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 30)
-                        .padding(.vertical, 14)
-                        .background(
-                            LinearGradient(colors: [airBlue, Color(hex: "#0D2B8A")],
-                                           startPoint: .leading, endPoint: .trailing)
+                    paymentError = nil
+                    if selectedCard == .amex {
+                        // American Express is declined for this fare. Fire a REAL
+                        // failing request → native network error (Error Analysis +
+                        // Session Replay timeline), not a custom event. The banner
+                        // below is the in-flow UX. Booking does NOT proceed.
+                        isPaying = true
+                        DemoErrorSimulator.requestFailure(
+                            status: 402, method: "POST", path: "/v1/payments/charge",
+                            screen: "Air - Review & Pay",
+                            market: marketConfig.market.trackingLabel
                         )
-                        .clipShape(RoundedRectangle(cornerRadius: AppRadius.full))
-                        .shadow(color: airBlue.opacity(0.35), radius: 8, x: 0, y: 4)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            isPaying = false
+                            withAnimation(.spring(response: 0.4)) {
+                                paymentError = t("Payment declined. American Express isn’t accepted for this fare.",
+                                                 "決済が拒否されました。この運賃ではアメリカン・エキスプレスはご利用いただけません。")
+                            }
+                        }
+                    } else {
+                        CSQ.trackEvent("air_review_pay_tapped", properties: [
+                            "route":       "\(flight.origin.code)-\(flight.destination.code)",
+                            "final_price": finalTotal,
+                            "method":      selectedCard.token,
+                            "market":      marketConfig.market.trackingLabel
+                        ])
+                        showBooking = true
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if isPaying {
+                            ProgressView().progressViewStyle(.circular).tint(.white).scaleEffect(0.8)
+                        }
+                        Text(isPaying ? t("Processing…", "処理中…") : t("Confirm & Pay", "確認して支払う"))
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(colors: [airBlue, Color(hex: "#0D2B8A")],
+                                       startPoint: .leading, endPoint: .trailing)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.full))
+                    .shadow(color: airBlue.opacity(0.35), radius: 8, x: 0, y: 4)
                 }
+                .disabled(isPaying)
                 .accessibilityIdentifier(ReviewAccessID.confirmPay)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
             .background(Color.csqSurface)
+        }
+    }
+}
+
+// Payment cards offered on Air - Review & Pay. American Express is deliberately
+// declined (native payment failure) for the friction demo; the others succeed.
+enum AirCard: String, CaseIterable, Identifiable {
+    case visa
+    case mastercard
+    case amex
+
+    var id: String { rawValue }
+    var token: String { rawValue }            // stable analytics token: visa / mastercard / amex
+
+    var displayName: String {
+        switch self {
+        case .visa:       return "Visa"
+        case .mastercard: return "Mastercard"
+        case .amex:       return "American Express"
+        }
+    }
+
+    var last4: String {
+        switch self {
+        case .visa:       return "4242"
+        case .mastercard: return "5100"
+        case .amex:       return "3782"
+        }
+    }
+
+    var brandColor: Color {
+        switch self {
+        case .visa:       return Color(hex: "#1A1F71")
+        case .mastercard: return Color(hex: "#EB001B")
+        case .amex:       return Color(hex: "#2E77BC")
         }
     }
 }

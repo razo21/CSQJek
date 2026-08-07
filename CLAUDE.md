@@ -174,7 +174,7 @@ This table reflects the actual `CSQ.trackScreenview(...)` calls in the code as o
 | `CSQAirHomeView.swift` | `"Air - Home"` | ✅ live |
 | `FlightResultsView.swift` | `"Air - Results"` | ✅ live |
 | `FlightDetailView.swift` | `"Air - Flight Detail"` | ✅ live |
-| `FlightDetailView.swift` (AirReviewPayView) | `"Air - Review & Pay"` | ✅ live (drip-pricing + dead promo control — friction demo) |
+| `FlightDetailView.swift` (AirReviewPayView) | `"Air - Review & Pay"` | ✅ live (drip-pricing + dead promo control + card picker; **Amex → native payment failure** — friction demo) |
 | `BookingConfirmationView.swift` | `"Air - Booking Confirmation"` | ✅ live |
 | `MeatCategoryView.swift` | `"Grocery - Meat"` | ✅ live |
 | `RiderTrackingView.swift` | `"Grocery - Rider Tracking"` | ✅ live |
@@ -301,7 +301,8 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `burrito_build_completed` | "Add to Cart" in the builder — feeds the standard CSQFood checkout | `base`, `protein`, `salsa`, `topping_count`, `extra_count`, `total`, `market` |
 | `air_review_shown` | AirReviewPayView appears (drip-pricing reveal) | `route`, `fare`, `advertised_price`, `final_price`, `uplift_pct`, `market` |
 | `air_review_abandoned` | Back out of Review & Pay (price-shock drop-off) | `route`, `advertised_price`, `final_price`, `market` |
-| `air_review_pay_tapped` | "Confirm & Pay" on Review & Pay → Booking Confirmation | `route`, `final_price`, `market` |
+| `air_review_pay_tapped` | "Confirm & Pay" on Review & Pay (non-Amex card → Booking Confirmation) | `route`, `final_price`, `method`, `market` |
+| `air_payment_method_selected` | Card row tap on Review & Pay (Visa / Mastercard / Amex) | `method` (`visa`/`mastercard`/`amex`), `market` |
 | `food_view_cart_tapped` | Floating cart bar tap in FoodHomeView | `item_count`, `subtotal`, `market` |
 | `telco_plan_viewed` | Plan card becomes visible in TelcoHomeView | `plan_name`, `plan_type`, `price` |
 | `telco_addon_tapped` | Add-on row tap in TelcoHomeView | `addon_name` |
