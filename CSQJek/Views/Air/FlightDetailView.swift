@@ -188,11 +188,11 @@ struct FlightDetailView: View {
             .padding(.top, 8)
         }
         .fullScreenCover(isPresented: $showBooking) {
-            BookingConfirmationView(
+            AirReviewPayView(
                 flight: flight,
                 fare: selectedFare,
                 search: search,
-                totalPrice: totalPrice,
+                advertisedTotal: totalPrice,
                 isAirPresented: $isAirPresented
             )
             .environmentObject(marketConfig)
@@ -520,6 +520,327 @@ struct FlightDetailView: View {
             Text(value)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.csqTextPrimary)
+        }
+    }
+}
+
+// MARK: - Review & Pay (CSQAir friction step)
+//
+// Deliberate friction inserted between Flight Detail and Booking Confirmation:
+//   1. DRIP PRICING — the advertised fare balloons with taxes, a carrier surcharge
+//      and a mandatory "seat + carry-on bundle" before the user can pay, so the
+//      total is ~30% above what they clicked. `air_review_shown` carries both the
+//      advertised and final price so the price-shock → abandonment funnel is
+//      measurable; backing out fires `air_review_abandoned`.
+//   2. DEAD CONTROL — the promo-code "Apply" button never applies (always "invalid").
+//      The user hammers it → rage clicks. Reuses the shared FrustrationSignal.promoRage
+//      (service: "CSQAir") so it segments alongside the other coupon surfaces.
+struct AirReviewPayView: View {
+    let flight: Flight
+    let fare: FlightDetailView.FareOption
+    let search: FlightSearch
+    let advertisedTotal: Double            // the price the Flight Detail CTA showed
+    @Binding var isAirPresented: Bool
+
+    @EnvironmentObject var marketConfig: MarketConfig
+    @Environment(\.dismiss) var dismiss
+
+    @State private var showBooking   = false
+    @State private var promoText     = ""
+    @State private var promoFailed   = false
+    @State private var promoFailures = 0
+    @State private var promoRage     = RageTapDetector()
+
+    private let airBlue = Color(hex: "#1B3FAB")
+
+    private enum ReviewAccessID {
+        static let back        = "air_review_btn_back"
+        static let promoInput  = "air_review_input_promo"
+        static let promoApply  = "air_review_btn_apply_promo"
+        static let confirmPay  = "air_review_btn_confirm_pay"
+    }
+
+    // Tiny inline localizer — English (SG / Sydney) vs 日本語 (Tokyo).
+    private func t(_ en: String, _ jp: String) -> String {
+        marketConfig.market == .tokyo ? jp : en
+    }
+    private var isYen: Bool { marketConfig.market == .tokyo }
+
+    // MARK: Drip-pricing components (all derived from the advertised total)
+    private var taxes: Double            { advertisedTotal * 0.09 }
+    private var carrierSurcharge: Double { advertisedTotal * 0.11 }
+    private var seatBagBundle: Double    { advertisedTotal * 0.10 }
+    private var bookingFee: Double       { isYen ? 1200 : 12.90 }
+    private var finalTotal: Double {
+        advertisedTotal + taxes + carrierSurcharge + seatBagBundle + bookingFee
+    }
+    private var upliftPct: Int {
+        guard advertisedTotal > 0 else { return 0 }
+        return Int(((finalTotal / advertisedTotal) - 1) * 100)
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.csqBackground.ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 16) {
+                    tripSummary
+                    priceSummary
+                    promoCard
+                    Spacer(minLength: 110)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            }
+
+            confirmBar
+        }
+        .safeAreaInset(edge: .top) { header }
+        .fullScreenCover(isPresented: $showBooking) {
+            BookingConfirmationView(
+                flight: flight,
+                fare: fare,
+                search: search,
+                totalPrice: finalTotal,
+                isAirPresented: $isAirPresented
+            )
+            .environmentObject(marketConfig)
+        }
+        .onAppear {
+            CSQ.trackScreenview("Air - Review & Pay")
+            CSQ.trackEvent("air_review_shown", properties: [
+                "route":            "\(flight.origin.code)-\(flight.destination.code)",
+                "fare":             fare.rawValue,
+                "advertised_price": advertisedTotal,
+                "final_price":      finalTotal,
+                "uplift_pct":       upliftPct,
+                "market":           marketConfig.market.trackingLabel
+            ])
+        }
+    }
+
+    // MARK: Header
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button {
+                CSQ.trackEvent("air_review_abandoned", properties: [
+                    "route":            "\(flight.origin.code)-\(flight.destination.code)",
+                    "advertised_price": advertisedTotal,
+                    "final_price":      finalTotal,
+                    "market":           marketConfig.market.trackingLabel
+                ])
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 36, height: 36)
+                    .background(Color.white.opacity(0.2))
+                    .clipShape(Circle())
+            }
+            .accessibilityIdentifier(ReviewAccessID.back)
+            .accessibilityLabel(t("Back", "戻る"))
+
+            Text(t("Review & Pay", "確認と支払い"))
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(.white)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 14)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(colors: [airBlue, Color(hex: "#0D2B8A")],
+                           startPoint: .leading, endPoint: .trailing)
+                .ignoresSafeArea(edges: .top)
+        )
+    }
+
+    // MARK: Trip summary
+    private var tripSummary: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(t("Your trip", "ご旅行"))
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.csqTextPrimary)
+            HStack(spacing: 8) {
+                Text("\(flight.origin.code) → \(flight.destination.code)")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(airBlue)
+                Text("·")
+                    .foregroundColor(.csqTextTertiary)
+                Text(flight.airline.name)
+                    .font(.system(size: 13))
+                    .foregroundColor(.csqTextSecondary)
+            }
+            Text("\(fare.rawValue) · \(search.passengers) \(t("pax", "名")) · \(flight.departureTime)–\(flight.arrivalTime)")
+                .font(.system(size: 12))
+                .foregroundColor(.csqTextSecondary)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.csqSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.07), radius: 8, x: 0, y: 3)
+    }
+
+    // MARK: Price summary (the drip-pricing reveal)
+    private var priceSummary: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(t("Price summary", "料金明細"))
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.csqTextPrimary)
+
+            row(t("Advertised fare", "表示運賃"), marketConfig.market.formatPrice(advertisedTotal))
+            row(t("Taxes & government charges", "税金・空港使用料"), "+\(marketConfig.market.formatPrice(taxes))")
+            row(t("Carrier surcharge", "航空会社サーチャージ"), "+\(marketConfig.market.formatPrice(carrierSurcharge))")
+            row("\(t("Seat + carry-on bundle", "座席・手荷物バンドル")) · \(t("required", "必須"))",
+                "+\(marketConfig.market.formatPrice(seatBagBundle))",
+                emphasize: true)
+            row(t("Booking service fee", "予約手数料"), "+\(marketConfig.market.formatPrice(bookingFee))")
+
+            Divider()
+
+            HStack {
+                Text(t("Total due", "お支払い総額"))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.csqTextPrimary)
+                Spacer()
+                Text(marketConfig.market.formatPrice(finalTotal))
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(airBlue)
+            }
+
+            // Price-shock callout
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 11))
+                Text(isYen
+                     ? "表示運賃より\(upliftPct)%高くなっています"
+                     : "That's \(upliftPct)% more than the fare shown")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundColor(.csqWarning)
+            .padding(.top, 2)
+        }
+        .padding(16)
+        .background(Color.csqSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.07), radius: 8, x: 0, y: 3)
+    }
+
+    private func row(_ label: String, _ value: String, emphasize: Bool = false) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 13, weight: emphasize ? .semibold : .regular))
+                .foregroundColor(emphasize ? .csqTextPrimary : .csqTextSecondary)
+            Spacer()
+            Text(value)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.csqTextPrimary)
+        }
+    }
+
+    // MARK: Promo card (the dead control)
+    private var promoCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(t("Promo code", "プロモコード"))
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.csqTextPrimary)
+
+            HStack(spacing: 8) {
+                TextField(t("Enter promo code", "プロモコードを入力"), text: $promoText)
+                    .font(.system(size: 14))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.csqBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .csqMaskContents(true)
+                    .accessibilityIdentifier(ReviewAccessID.promoInput)
+
+                Button(action: applyPromo) {
+                    Text(t("Apply", "適用"))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(airBlue)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .accessibilityIdentifier(ReviewAccessID.promoApply)
+                .accessibilityLabel(t("Apply promo code", "プロモコードを適用"))
+            }
+
+            if promoFailed {
+                Text(t("Code not valid. Try again.", "コードが無効です。もう一度お試しください。"))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.csqError)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.csqSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.07), radius: 8, x: 0, y: 3)
+    }
+
+    // ⚠️ Deliberately-broken control: the promo code NEVER applies. Every tap shows
+    // an error and never discounts anything, so the user hammers "Apply" → rage.
+    private func applyPromo() {
+        promoFailed = true
+        promoFailures += 1
+        if let count = promoRage.registerTap() {
+            FrustrationSignal.promoRage(
+                service: "CSQAir",
+                screen: "Air - Review & Pay",
+                tapCount: count,
+                failedAttempts: promoFailures,
+                codeLength: promoText.count,
+                market: marketConfig.market
+            )
+        }
+    }
+
+    // MARK: Confirm & Pay
+    private var confirmBar: some View {
+        VStack(spacing: 0) {
+            Divider()
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(marketConfig.market.formatPrice(finalTotal))
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundColor(airBlue)
+                    Text(t("Total due", "お支払い総額"))
+                        .font(.system(size: 11))
+                        .foregroundColor(.csqTextSecondary)
+                }
+                Spacer()
+                Button {
+                    CSQ.trackEvent("air_review_pay_tapped", properties: [
+                        "route":       "\(flight.origin.code)-\(flight.destination.code)",
+                        "final_price": finalTotal,
+                        "market":      marketConfig.market.trackingLabel
+                    ])
+                    showBooking = true
+                } label: {
+                    Text(t("Confirm & Pay", "確認して支払う"))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 30)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(colors: [airBlue, Color(hex: "#0D2B8A")],
+                                           startPoint: .leading, endPoint: .trailing)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: AppRadius.full))
+                        .shadow(color: airBlue.opacity(0.35), radius: 8, x: 0, y: 4)
+                }
+                .accessibilityIdentifier(ReviewAccessID.confirmPay)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(Color.csqSurface)
         }
     }
 }
