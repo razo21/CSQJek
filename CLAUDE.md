@@ -174,6 +174,7 @@ This table reflects the actual `CSQ.trackScreenview(...)` calls in the code as o
 | `CSQAirHomeView.swift` | `"Air - Home"` | ✅ live |
 | `FlightResultsView.swift` | `"Air - Results"` | ✅ live |
 | `FlightDetailView.swift` | `"Air - Flight Detail"` | ✅ live |
+| `FlightDetailView.swift` (AirReviewPayView) | `"Air - Review & Pay"` | ✅ live (drip-pricing + dead promo control — friction demo) |
 | `BookingConfirmationView.swift` | `"Air - Booking Confirmation"` | ✅ live |
 | `MeatCategoryView.swift` | `"Grocery - Meat"` | ✅ live |
 | `RiderTrackingView.swift` | `"Grocery - Rider Tracking"` | ✅ live |
@@ -298,6 +299,9 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `burrito_topping_selected` | Topping option tap (multi-select) in the builder | `option`, `step`, `price_delta`, `market` |
 | `burrito_extra_selected` | Extra / make-it-a-meal add-on tap (multi-select) | `option`, `step`, `price_delta`, `market` |
 | `burrito_build_completed` | "Add to Cart" in the builder — feeds the standard CSQFood checkout | `base`, `protein`, `salsa`, `topping_count`, `extra_count`, `total`, `market` |
+| `air_review_shown` | AirReviewPayView appears (drip-pricing reveal) | `route`, `fare`, `advertised_price`, `final_price`, `uplift_pct`, `market` |
+| `air_review_abandoned` | Back out of Review & Pay (price-shock drop-off) | `route`, `advertised_price`, `final_price`, `market` |
+| `air_review_pay_tapped` | "Confirm & Pay" on Review & Pay → Booking Confirmation | `route`, `final_price`, `market` |
 | `food_view_cart_tapped` | Floating cart bar tap in FoodHomeView | `item_count`, `subtotal`, `market` |
 | `telco_plan_viewed` | Plan card becomes visible in TelcoHomeView | `plan_name`, `plan_type`, `price` |
 | `telco_addon_tapped` | Add-on row tap in TelcoHomeView | `addon_name` |
@@ -363,7 +367,7 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 
 | Event Name | Where to fire | Key Properties |
 |------------|---------------|----------------|
-| `promo_rage_apply` | Coupon "Apply" hammered on an invalid code — shared across CSQRide (`ConfirmRideView`), CSQFood (`FoodOrderView`), CSQMart (`CartView`). Segment by `service`. | `service` (`CSQRide`/`CSQFood`/`CSQMart`), `screen`, `tap_count`, `failed_attempts`, `code_length` (length only — never the code), `market` |
+| `promo_rage_apply` | Coupon "Apply" hammered on an invalid code — shared across CSQRide (`ConfirmRideView`), CSQFood (`FoodOrderView`), CSQMart (`CartView`), CSQAir (`AirReviewPayView`). Segment by `service`. | `service` (`CSQRide`/`CSQFood`/`CSQMart`/`CSQAir`), `screen`, `tap_count`, `failed_attempts`, `code_length` (length only — never the code), `market` |
 | `telco_payment_rage_retry` | A failing bill payment retried ≥3 times in `TelcoBillsView` | `invoice_no`, `tap_count`, `amount`, `method`, `market` |
 | `burrito_option_rage` | The deliberately-broken **guacamole** topping in the CSQ Burrito builder hammered ≥3 times (it never registers a selection — a demo dead-control that provokes rage clicks) | `option` (`guac`), `step` (`toppings`), `tap_count`, `market` |
 
