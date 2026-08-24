@@ -180,6 +180,7 @@ This table reflects the actual `CSQ.trackScreenview(...)` calls in the code as o
 | `TixHomeView.swift` (TixEventDetailView) | `"Tix - Event Detail"` | ✅ live |
 | `TixHomeView.swift` (TixCheckoutView) | `"Tix - Checkout"` | ✅ live |
 | `TixHomeView.swift` (TixConfirmedView) | `"Tix - Order Confirmed"` | ✅ live (QR ticket) |
+| `TixHomeView.swift` (TixResellSeatView) | `"Tix - Resell Seat Select"` | ✅ live (resale seat friction — **8s spinner → native 504 timeout**) |
 | `MeatCategoryView.swift` | `"Grocery - Meat"` | ✅ live |
 | `RiderTrackingView.swift` | `"Grocery - Rider Tracking"` | ✅ live |
 | `GroceryComingSoonView.swift` | `"Grocery - Coming Soon"` | ✅ live |
@@ -313,6 +314,10 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `tix_tier_selected` | Ticket-tier row tap in TixEventDetailView | `event`, `tier` (`ga`/`lower`/`vip`), `price`, `market` |
 | `tix_checkout_started` | TixCheckoutView appears | `event`, `tier`, `quantity`, `subtotal`, `market` |
 | `tix_order_completed` | "Place Order" in TixCheckoutView — terminal conversion | `event`, `tier`, `quantity`, `total`, `market` |
+| `tix_resale_seat_selected` | Seat tapped in TixResellSeatView (each attempt) | `seat`, `attempt`, `market` |
+| `tix_resale_seat_rage` | Seat-reserve hammered ≥3× in TixResellSeatView (frustration signal) | `tap_count`, `seat`, `market` |
+
+**CSQTix resale seat friction (native error):** the seat-selection step of the resale flow (`TixResellSeatView`, screen `"Tix - Resell Seat Select"`) is a deliberate friction demo. Tapping a seat shows an 8-second blocking "Verifying with the venue…" spinner, then fires a real `POST /v1/resale/seat/hold` that returns **504 Gateway Timeout** via `DemoErrorSimulator` — captured NATIVELY (Error Analysis + Session Replay), not a custom event. "Try Again" repeats the 8s hang. (Native iOS has no JavaScript errors; a native API error is the equivalent.)
 | `food_view_cart_tapped` | Floating cart bar tap in FoodHomeView | `item_count`, `subtotal`, `market` |
 | `telco_plan_viewed` | Plan card becomes visible in TelcoHomeView | `plan_name`, `plan_type`, `price` |
 | `telco_addon_tapped` | Add-on row tap in TelcoHomeView | `addon_name` |

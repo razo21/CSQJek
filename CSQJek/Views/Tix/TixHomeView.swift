@@ -21,6 +21,10 @@ private enum TixAccessID {
     static let checkoutBack     = "tix_checkout_btn_back"
     static let placeOrder       = "tix_checkout_btn_place_order"
     static let confirmDone      = "tix_confirm_btn_done"
+    static let resellEntry      = "tix_resell_entry_banner"
+    static let resellBack       = "tix_resell_btn_back"
+    static func seat(_ id: String) -> String { "tix_resell_seat_\(id)" }
+    static let resellTryAgain   = "tix_resell_btn_try_again"
 }
 
 private let tixViolet = Color(hex: "#6D28D9")
@@ -49,6 +53,7 @@ struct TixHomeView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 22) {
                         categoryChips
+                        resellBanner
                         if selectedCategory == nil { featuredSection }
                         sellingFastSection
                         allEventsSection
@@ -132,6 +137,33 @@ struct TixHomeView: View {
             .overlay(Capsule().stroke(Color.csqBorder, lineWidth: selected ? 0 : 1))
         }
         .accessibilityIdentifier(TixAccessID.categoryChip(cat?.rawValue ?? "all"))
+    }
+
+    // Entry to the resale flow — its seat-selection step is a deliberate friction demo.
+    private var resellBanner: some View {
+        NavigationLink {
+            TixResellSeatView(isPresented: $isPresented)
+                .environmentObject(marketConfig)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.left.arrow.right.circle.fill")
+                    .font(.system(size: 24)).foregroundColor(.white)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t("Sell your tickets", "チケットを売る"))
+                        .font(.system(size: 15, weight: .bold)).foregroundColor(.white)
+                    Text(t("List a seat on the CSQTix resale marketplace", "CSQTixリセールに座席を出品"))
+                        .font(.system(size: 11)).foregroundColor(.white.opacity(0.9))
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
+            }
+            .padding(14)
+            .background(LinearGradient(colors: [Color(hex: "#0F766E"), Color(hex: "#0E7490")],
+                                       startPoint: .leading, endPoint: .trailing))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .padding(.horizontal, 16)
+        }
+        .accessibilityIdentifier(TixAccessID.resellEntry)
     }
 
     private var featuredSection: some View {
@@ -719,5 +751,217 @@ struct TixConfirmedView: View {
             }
         }
         .onAppear { CSQ.trackScreenview("Tix - Order Confirmed") }
+    }
+}
+
+// MARK: - Resale Seat Selection (⚠️ deliberate friction: 8s spinner → native 504 timeout)
+//
+// The seat-selection step of the resale flow is intentionally broken for the demo:
+// tapping any seat shows a blocking "Verifying with the venue…" spinner that hangs
+// for a full 8 seconds and then FAILS. The failure fires a real POST that returns
+// 504 Gateway Timeout, so Contentsquare captures it as a NATIVE API error on the
+// Session Replay timeline + Error Analysis (native iOS has no JavaScript errors —
+// this is the equivalent). "Try Again" repeats the 8-second pain; repeated attempts
+// also emit a rage signal. Screen: "Tix - Resell Seat Select".
+struct TixResellSeatView: View {
+    @Binding var isPresented: Bool
+    @EnvironmentObject var marketConfig: MarketConfig
+    @Environment(\.dismiss) var dismiss
+
+    @State private var selectedSeat: String? = nil
+    @State private var reserving = false
+    @State private var failed = false
+    @State private var attempts = 0
+    @State private var seatRage = RageTapDetector()
+
+    private func t(_ en: String, _ jp: String) -> String { marketConfig.market == .tokyo ? jp : en }
+    private let teal = Color(hex: "#0F766E")
+
+    private let rows = ["A", "B", "C", "D", "E", "F"]
+    private let seatsPerRow = 10
+    // Fixed "already taken" seats — deterministic so the map looks real and stable.
+    private let taken: Set<String> = ["A3", "A4", "B7", "C2", "C3", "D9", "E5", "F1", "F2", "F8"]
+
+    var body: some View {
+        ZStack {
+            Color.csqBackground.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                header
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        instructions
+                        stageBar
+                        seatMap
+                        legend
+                        if failed, let seat = selectedSeat { errorCard(seat) }
+                        Spacer(minLength: 24)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                }
+            }
+
+            if reserving { reservingOverlay }
+        }
+        .navigationBarHidden(true)
+        .onAppear { CSQ.trackScreenview("Tix - Resell Seat Select") }
+    }
+
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold)).foregroundColor(.white)
+                    .frame(width: 36, height: 36).background(Color.white.opacity(0.2)).clipShape(Circle())
+            }
+            .accessibilityIdentifier(TixAccessID.resellBack)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(t("List a Ticket for Resale", "リセール出品")).font(.system(size: 17, weight: .bold)).foregroundColor(.white)
+                Text(t("Select your seat", "座席を選択")).font(.system(size: 11)).foregroundColor(.white.opacity(0.9))
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 14).frame(maxWidth: .infinity)
+        .background(LinearGradient(colors: [teal, Color(hex: "#0E7490")], startPoint: .leading, endPoint: .trailing)
+            .ignoresSafeArea(edges: .top))
+    }
+
+    private var instructions: some View {
+        Text(t("Tap the seat you want to list. We'll verify it with the venue before publishing.",
+               "出品する座席をタップしてください。公開前に会場と照合します。"))
+            .font(.system(size: 13)).foregroundColor(.csqTextSecondary)
+    }
+
+    private var stageBar: some View {
+        Text(t("S T A G E", "ス テ ー ジ"))
+            .font(.system(size: 12, weight: .bold)).foregroundColor(.csqTextSecondary)
+            .frame(maxWidth: .infinity).padding(.vertical, 8)
+            .background(Color.csqBorder.opacity(0.5)).clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var seatMap: some View {
+        VStack(spacing: 8) {
+            ForEach(rows, id: \.self) { row in
+                HStack(spacing: 6) {
+                    Text(row).font(.system(size: 11, weight: .semibold)).foregroundColor(.csqTextTertiary).frame(width: 14)
+                    ForEach(1...seatsPerRow, id: \.self) { num in
+                        seatCell("\(row)\(num)")
+                    }
+                }
+            }
+        }
+    }
+
+    private func seatCell(_ id: String) -> some View {
+        let isTaken = taken.contains(id)
+        let isSelected = selectedSeat == id
+        return Button {
+            guard !isTaken, !reserving else { return }
+            attemptReserve(id)
+        } label: {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(isTaken ? Color.csqBorder
+                      : isSelected ? teal
+                      : teal.opacity(0.12))
+                .frame(height: 26)
+                .overlay(
+                    Image(systemName: isTaken ? "xmark" : "chair.fill")
+                        .font(.system(size: 9))
+                        .foregroundColor(isTaken ? .csqTextTertiary : isSelected ? .white : teal)
+                )
+        }
+        .disabled(isTaken || reserving)
+        .accessibilityIdentifier(TixAccessID.seat(id))
+        .accessibilityLabel("Seat \(id)\(isTaken ? " taken" : "")")
+    }
+
+    private var legend: some View {
+        HStack(spacing: 16) {
+            legendItem(teal.opacity(0.12), t("Available", "空席"))
+            legendItem(teal, t("Selected", "選択中"))
+            legendItem(Color.csqBorder, t("Taken", "販売済"))
+            Spacer()
+        }
+        .font(.system(size: 11)).foregroundColor(.csqTextSecondary)
+    }
+
+    private func legendItem(_ color: Color, _ label: String) -> some View {
+        HStack(spacing: 5) {
+            RoundedRectangle(cornerRadius: 3).fill(color).frame(width: 14, height: 14)
+            Text(label)
+        }
+    }
+
+    private func errorCard(_ seat: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.octagon.fill").font(.system(size: 18)).foregroundColor(.csqError)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t("Verification timed out", "照合がタイムアウトしました"))
+                        .font(.system(size: 14, weight: .bold)).foregroundColor(.csqError)
+                    Text(t("The venue didn't respond for seat \(seat). (Error CSQ-504)",
+                           "座席\(seat)について会場から応答がありませんでした。（エラー CSQ-504）"))
+                        .font(.system(size: 12)).foregroundColor(.csqTextSecondary)
+                }
+            }
+            Button { attemptReserve(seat) } label: {
+                Text(t("Try Again", "再試行"))
+                    .font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(teal).clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .accessibilityIdentifier(TixAccessID.resellTryAgain)
+        }
+        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.csqError.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.csqError.opacity(0.3), lineWidth: 1))
+    }
+
+    private var reservingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.55).ignoresSafeArea()
+            VStack(spacing: 16) {
+                ProgressView().progressViewStyle(.circular).tint(.white).scaleEffect(1.6)
+                Text(t("Verifying seat \(selectedSeat ?? "") with the venue…",
+                       "座席\(selectedSeat ?? "")を会場と照合中…"))
+                    .font(.system(size: 14, weight: .semibold)).foregroundColor(.white)
+                Text(t("Please don't close the app", "アプリを閉じないでください"))
+                    .font(.system(size: 11)).foregroundColor(.white.opacity(0.7))
+            }
+            .padding(28).background(Color.black.opacity(0.35)).clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .transition(.opacity)
+    }
+
+    // ⚠️ The deliberate 8-second hang + native 504 timeout.
+    private func attemptReserve(_ seat: String) {
+        selectedSeat = seat
+        failed = false
+        attempts += 1
+        withAnimation { reserving = true }
+
+        CSQ.trackEvent("tix_resale_seat_selected", properties: [
+            "seat":    seat,
+            "attempt": attempts,
+            "market":  marketConfig.market.trackingLabel
+        ])
+        if let count = seatRage.registerTap() {
+            CSQ.trackEvent("tix_resale_seat_rage", properties: [
+                "tap_count": count,
+                "seat":      seat,
+                "market":    marketConfig.market.trackingLabel
+            ])
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
+            // Real failing request → native 504 error captured by CS (Error Analysis + replay).
+            DemoErrorSimulator.requestFailure(
+                status: 504, method: "POST", path: "/v1/resale/seat/hold",
+                screen: "Tix - Resell Seat Select",
+                market: marketConfig.market.trackingLabel
+            )
+            withAnimation { reserving = false }
+            failed = true
+        }
     }
 }
