@@ -75,8 +75,8 @@ struct TixEvent: Identifiable {
     let imageName: String   // asset name — empty/absent = accent-gradient fallback
     let accent: Color
     let tags: [String]      // ["Selling Fast", "Few Left"]
-    let tiers: [TixTier]
     let idKey: String       // stable analytics token for the event
+    let tiers: [TixTier]
 
     var priceFrom: Double { tiers.filter { !$0.soldOut }.map(\.price).min() ?? tiers.map(\.price).min() ?? 0 }
 
