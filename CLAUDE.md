@@ -176,6 +176,10 @@ This table reflects the actual `CSQ.trackScreenview(...)` calls in the code as o
 | `FlightDetailView.swift` | `"Air - Flight Detail"` | ✅ live |
 | `FlightDetailView.swift` (AirReviewPayView) | `"Air - Review & Pay"` | ✅ live (drip-pricing + dead promo control + card picker; **Amex → native payment failure** — friction demo) |
 | `BookingConfirmationView.swift` | `"Air - Booking Confirmation"` | ✅ live |
+| `TixHomeView.swift` | `"Tix - Home"` | ✅ live (CSQTix ticketing — browse) |
+| `TixHomeView.swift` (TixEventDetailView) | `"Tix - Event Detail"` | ✅ live |
+| `TixHomeView.swift` (TixCheckoutView) | `"Tix - Checkout"` | ✅ live |
+| `TixHomeView.swift` (TixConfirmedView) | `"Tix - Order Confirmed"` | ✅ live (QR ticket) |
 | `MeatCategoryView.swift` | `"Grocery - Meat"` | ✅ live |
 | `RiderTrackingView.swift` | `"Grocery - Rider Tracking"` | ✅ live |
 | `GroceryComingSoonView.swift` | `"Grocery - Coming Soon"` | ✅ live |
@@ -303,6 +307,12 @@ CSQ.trackEvent("event_name", properties: ["key": "value"])
 | `air_review_abandoned` | Back out of Review & Pay (price-shock drop-off) | `route`, `advertised_price`, `final_price`, `market` |
 | `air_review_pay_tapped` | "Confirm & Pay" on Review & Pay (non-Amex card → Booking Confirmation) | `route`, `final_price`, `method`, `market` |
 | `air_payment_method_selected` | Card row tap on Review & Pay (Visa / Mastercard / Amex) | `method` (`visa`/`mastercard`/`amex`), `market` |
+| `tix_category_selected` | Category chip tap in TixHomeView (All/Concerts/Sports/Arts/Family) | `category`, `market` |
+| `tix_event_tapped` | Event card / row tap in TixHomeView | `event`, `category`, `market` |
+| `tix_event_viewed` | TixEventDetailView appears | `event`, `performer`, `category`, `price_from`, `market` |
+| `tix_tier_selected` | Ticket-tier row tap in TixEventDetailView | `event`, `tier` (`ga`/`lower`/`vip`), `price`, `market` |
+| `tix_checkout_started` | TixCheckoutView appears | `event`, `tier`, `quantity`, `subtotal`, `market` |
+| `tix_order_completed` | "Place Order" in TixCheckoutView — terminal conversion | `event`, `tier`, `quantity`, `total`, `market` |
 | `food_view_cart_tapped` | Floating cart bar tap in FoodHomeView | `item_count`, `subtotal`, `market` |
 | `telco_plan_viewed` | Plan card becomes visible in TelcoHomeView | `plan_name`, `plan_type`, `price` |
 | `telco_addon_tapped` | Add-on row tap in TelcoHomeView | `addon_name` |
@@ -535,6 +545,7 @@ TextField("Search...", text: $query)
 | **Home** | `home_service_tile_csqclean` | Service tile |
 | **Home** | `home_service_tile_csqcash` | Service tile |
 | **Home** | `home_service_tile_csqmobile` | Service tile |
+| **Home** | `home_tile_csqtix` | CSQTix service tile (actual ID emitted by `HomeAccessID.serviceTile`) |
 | **Confirm Ride** | `confirm_ride_option_csqride` | Ride option card |
 | **Confirm Ride** | `confirm_ride_option_csqxpress` | Ride option card |
 | **Confirm Ride** | `confirm_ride_option_csqblack` | Ride option card |

@@ -13,6 +13,7 @@ private let homeServices: [(name: String, imageName: String, icon: String, color
     ("CSQAir",         "IconAir",         "airplane",               Color(hex: "#1B3FAB"), true),
     ("CSQCash",        "IconCash",        "dollarsign.circle.fill", Color.csqWarning,      true),
     ("CSQMobile",      "IconMobile",      "simcard.fill",           Color.csqTelcoTeal,    true),
+    ("CSQTix",         "IconTix",         "ticket.fill",            Color(hex: "#6D28D9"), true),
 ]
 
 // MARK: - CS Accessibility ID Registry
@@ -65,7 +66,7 @@ struct HomeView: View {
     // One full-screen flow at a time. Stacking multiple `.fullScreenCover` modifiers
     // on a single view conflicts in SwiftUI (a flow could open then immediately bounce
     // back to Home). Driven by a single item-based cover instead.
-    enum HomeFlow: String, Identifiable { case ride, telco, mart, air, cash; var id: String { rawValue } }
+    enum HomeFlow: String, Identifiable { case ride, telco, mart, air, cash, tix; var id: String { rawValue } }
     @State private var activeFlow: HomeFlow?
     @StateObject private var cartStore = CartStore()
     @State private var promoIndex      = 0
@@ -141,6 +142,9 @@ struct HomeView: View {
                     .environmentObject(marketConfig)
             case .cash:
                 CSQCashHomeView(isPresented: flowBinding(.cash))
+                    .environmentObject(marketConfig)
+            case .tix:
+                TixHomeView(isPresented: flowBinding(.tix))
                     .environmentObject(marketConfig)
             }
         }
@@ -304,6 +308,7 @@ struct HomeView: View {
                             case "CSQMart":   activeFlow = .mart
                             case "CSQAir":    activeFlow = .air
                             case "CSQCash":   activeFlow = .cash
+                            case "CSQTix":    activeFlow = .tix
                             default: break
                             }
                         }
