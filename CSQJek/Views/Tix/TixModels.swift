@@ -137,6 +137,54 @@ struct TixEvent: Identifiable {
                     TixTier("Day Pass", idKey: "ga", price: 28, perks: "General entry"),
                     TixTier("Guided Tour", idKey: "lower", price: 58, perks: "Entry + curator tour"),
                     TixTier("Family Bundle", idKey: "vip", price: 88, perks: "2 adults + 2 kids")
+                 ]),
+        TixEvent(name: "Coldsky — Music of the Spheres", performer: "Coldsky", category: .concerts,
+                 venue: "National Stadium", city: "Singapore", dateLabel: "Sat, 9 Aug · 8:00 PM",
+                 imageName: "TixColdsky", accent: Color(hex: "#2563EB"),
+                 tags: ["Selling Fast"], idKey: "coldsky_sg", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 168, perks: "Standing, pitch access"),
+                    TixTier("Lower Bowl Seated", idKey: "lower", price: 268, perks: "Reserved seat, level 1"),
+                    TixTier("VIP Package", idKey: "vip", price: 528, perks: "Front standing + merch + early entry")
+                 ]),
+        TixEvent(name: "Singapore Grand Prix — Night Race", performer: "Formula 1", category: .sports,
+                 venue: "Marina Bay Street Circuit", city: "Singapore", dateLabel: "Sun, 21 Sep · 8:00 PM",
+                 imageName: "TixF1", accent: Color(hex: "#DC2626"),
+                 tags: ["Selling Fast"], idKey: "singapore_gp_sg", tiers: [
+                    TixTier("Walkabout (3-Day)", idKey: "ga", price: 268, perks: "General standing, all zones"),
+                    TixTier("Bay Grandstand", idKey: "lower", price: 498, perks: "Reserved grandstand"),
+                    TixTier("Paddock Club", idKey: "vip", price: 1_288, perks: "Trackside suite + hospitality")
+                 ]),
+        TixEvent(name: "Lion City Sailors vs Tampines Rovers", performer: "Singapore Premier League", category: .sports,
+                 venue: "Jalan Besar Stadium", city: "Singapore", dateLabel: "Sat, 5 Jul · 7:30 PM",
+                 imageName: "TixFootball", accent: Color(hex: "#16A34A"),
+                 tags: [], idKey: "sailors_tampines_sg", tiers: [
+                    TixTier("Category 3", idKey: "ga", price: 18, perks: "Standing / upper"),
+                    TixTier("Category 1", idKey: "lower", price: 38, perks: "Halfway line"),
+                    TixTier("Premium", idKey: "vip", price: 78, perks: "Best seats + lounge")
+                 ]),
+        TixEvent(name: "Singapore Slingers vs Hong Kong Eastern", performer: "ASEAN Basketball League", category: .sports,
+                 venue: "OCBC Arena", city: "Singapore", dateLabel: "Fri, 18 Jul · 8:00 PM",
+                 imageName: "TixBasketball", accent: Color(hex: "#EA580C"),
+                 tags: [], idKey: "slingers_eastern_sg", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 25, perks: "Open seating"),
+                    TixTier("Lower Tier", idKey: "lower", price: 55, perks: "Reserved lower bowl"),
+                    TixTier("Courtside", idKey: "vip", price: 120, perks: "Courtside seats")
+                 ]),
+        TixEvent(name: "HYROX Singapore", performer: "HYROX", category: .sports,
+                 venue: "Singapore Expo", city: "Singapore", dateLabel: "Sat–Sun, 16–17 Aug · 8:00 AM",
+                 imageName: "TixHyrox", accent: Color(hex: "#0F172A"),
+                 tags: ["New"], idKey: "hyrox_sg", tiers: [
+                    TixTier("Spectator", idKey: "ga", price: 25, perks: "Watch all heats"),
+                    TixTier("Competitor — Single", idKey: "lower", price: 145, perks: "Race entry + timing chip"),
+                    TixTier("Competitor + Finisher Pack", idKey: "vip", price: 195, perks: "Entry + kit + finisher medal")
+                 ]),
+        TixEvent(name: "Monster Truck Mayhem", performer: "Monster Truck Mayhem Tour", category: .family,
+                 venue: "National Stadium", city: "Singapore", dateLabel: "Sat, 30 Aug · 6:00 PM",
+                 imageName: "TixMonsterTruck", accent: Color(hex: "#CA8A04"),
+                 tags: ["Few Left"], idKey: "monster_truck_sg", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 48, perks: "Grandstand seating"),
+                    TixTier("Pit Party Pass", idKey: "lower", price: 88, perks: "Pre-show pit access + seating"),
+                    TixTier("VIP Trackside", idKey: "vip", price: 148, perks: "Trackside + driver meet & greet")
                  ])
     ]
 
@@ -189,6 +237,54 @@ struct TixEvent: Identifiable {
                     TixTier("1日券", idKey: "ga", price: 2_800, perks: "通常入場"),
                     TixTier("ガイドツアー", idKey: "lower", price: 5_800, perks: "入場＋ツアー"),
                     TixTier("ファミリー券", idKey: "vip", price: 8_800, perks: "大人2＋子供2")
+                 ]),
+        TixEvent(name: "コールドスカイ — Music of the Spheres", performer: "コールドスカイ", category: .concerts,
+                 venue: "東京ドーム", city: "東京", dateLabel: "8月9日(土) 18:00",
+                 imageName: "TixColdsky", accent: Color(hex: "#2563EB"),
+                 tags: ["残りわずか"], idKey: "coldsky_tk", tiers: [
+                    TixTier("スタンディング", idKey: "ga", price: 16_800, perks: "アリーナ立見"),
+                    TixTier("指定席（1階）", idKey: "lower", price: 22_800, perks: "1階指定席"),
+                    TixTier("VIPパッケージ", idKey: "vip", price: 52_000, perks: "最前エリア＋グッズ")
+                 ]),
+        TixEvent(name: "読売ジャイアンツ vs 阪神タイガース", performer: "プロ野球", category: .sports,
+                 venue: "東京ドーム", city: "東京", dateLabel: "7月8日(火) 18:00",
+                 imageName: "TixBaseball", accent: Color(hex: "#EA580C"),
+                 tags: ["人気"], idKey: "giants_tigers_tk", tiers: [
+                    TixTier("外野自由席", idKey: "ga", price: 2_800, perks: "外野自由"),
+                    TixTier("内野指定席", idKey: "lower", price: 5_800, perks: "内野指定"),
+                    TixTier("プレミアムシート", idKey: "vip", price: 12_000, perks: "バックネット裏＋飲食付")
+                 ]),
+        TixEvent(name: "FC東京 vs 川崎フロンターレ", performer: "Jリーグ", category: .sports,
+                 venue: "国立競技場", city: "東京", dateLabel: "7月5日(土) 19:00",
+                 imageName: "TixFootball", accent: Color(hex: "#1D4ED8"),
+                 tags: [], idKey: "fctokyo_kawasaki_tk", tiers: [
+                    TixTier("カテゴリー3", idKey: "ga", price: 3_500, perks: "上層スタンド"),
+                    TixTier("カテゴリー1", idKey: "lower", price: 7_500, perks: "センターライン下層"),
+                    TixTier("SS指定席", idKey: "vip", price: 12_000, perks: "最前列＋ラウンジ")
+                 ]),
+        TixEvent(name: "大相撲 東京場所", performer: "日本相撲協会", category: .sports,
+                 venue: "両国国技館", city: "東京", dateLabel: "9月14日(日) 15:00",
+                 imageName: "TixSumo", accent: Color(hex: "#9F1239"),
+                 tags: ["人気"], idKey: "sumo_tk", tiers: [
+                    TixTier("自由席", idKey: "ga", price: 3_800, perks: "2階自由席"),
+                    TixTier("マス席（4人）", idKey: "lower", price: 11_800, perks: "1階マス席・4名"),
+                    TixTier("溜席", idKey: "vip", price: 22_000, perks: "土俵際・最前")
+                 ]),
+        TixEvent(name: "HYROX 東京", performer: "HYROX", category: .sports,
+                 venue: "幕張メッセ", city: "東京", dateLabel: "8月16–17日(土日) 8:00",
+                 imageName: "TixHyrox", accent: Color(hex: "#0F172A"),
+                 tags: ["新着"], idKey: "hyrox_tk", tiers: [
+                    TixTier("観戦チケット", idKey: "ga", price: 2_800, perks: "全ヒート観戦"),
+                    TixTier("参加（シングル）", idKey: "lower", price: 15_000, perks: "レース参加＋計測チップ"),
+                    TixTier("参加＋フィニッシャーパック", idKey: "vip", price: 19_800, perks: "参加＋キット＋メダル")
+                 ]),
+        TixEvent(name: "モンスタートラック・メイヘム", performer: "モンスタートラック・メイヘム", category: .family,
+                 venue: "東京ドーム", city: "東京", dateLabel: "8月30日(土) 18:00",
+                 imageName: "TixMonsterTruck", accent: Color(hex: "#CA8A04"),
+                 tags: ["残りわずか"], idKey: "monster_truck_tk", tiers: [
+                    TixTier("一般席", idKey: "ga", price: 4_800, perks: "スタンド席"),
+                    TixTier("ピットパス", idKey: "lower", price: 8_800, perks: "ピット入場＋席"),
+                    TixTier("VIPトラックサイド", idKey: "vip", price: 14_800, perks: "トラックサイド＋ドライバー交流")
                  ])
     ]
 
@@ -241,6 +337,54 @@ struct TixEvent: Identifiable {
                     TixTier("Day Pass", idKey: "ga", price: 32, perks: "General entry"),
                     TixTier("Guided Tour", idKey: "lower", price: 62, perks: "Entry + curator tour"),
                     TixTier("Family Bundle", idKey: "vip", price: 95, perks: "2 adults + 2 kids")
+                 ]),
+        TixEvent(name: "Coldsky — Music of the Spheres", performer: "Coldsky", category: .concerts,
+                 venue: "Accor Stadium", city: "Sydney", dateLabel: "Sat, 9 Aug · 7:30 PM",
+                 imageName: "TixColdsky", accent: Color(hex: "#2563EB"),
+                 tags: ["Selling Fast"], idKey: "coldsky_syd", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 179, perks: "Standing, floor access"),
+                    TixTier("Lower Grandstand", idKey: "lower", price: 289, perks: "Reserved seat, lower tier"),
+                    TixTier("VIP Package", idKey: "vip", price: 549, perks: "Front standing + merch + early entry")
+                 ]),
+        TixEvent(name: "Sydney Swans vs Collingwood", performer: "AFL", category: .sports,
+                 venue: "Sydney Cricket Ground", city: "Sydney", dateLabel: "Sat, 12 Jul · 1:45 PM",
+                 imageName: "TixAFL", accent: Color(hex: "#DC2626"),
+                 tags: ["Selling Fast"], idKey: "swans_collingwood_syd", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 35, perks: "GA bays"),
+                    TixTier("Reserved Seating", idKey: "lower", price: 79, perks: "Reserved grandstand"),
+                    TixTier("Premium", idKey: "vip", price: 149, perks: "Best seats + lounge access")
+                 ]),
+        TixEvent(name: "Sydney Roosters vs South Sydney Rabbitohs", performer: "NRL", category: .sports,
+                 venue: "Allianz Stadium", city: "Sydney", dateLabel: "Fri, 18 Jul · 8:00 PM",
+                 imageName: "TixNRL", accent: Color(hex: "#1E3A8A"),
+                 tags: ["Few Left"], idKey: "roosters_rabbitohs_syd", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 39, perks: "GA bays"),
+                    TixTier("Grandstand", idKey: "lower", price: 89, perks: "Reserved grandstand"),
+                    TixTier("Members Reserve", idKey: "vip", price: 159, perks: "Halfway + lounge")
+                 ]),
+        TixEvent(name: "Australia vs India — 3rd Test", performer: "Cricket Australia", category: .sports,
+                 venue: "Sydney Cricket Ground", city: "Sydney", dateLabel: "Thu–Mon, 3–7 Jan · 10:30 AM",
+                 imageName: "TixCricket", accent: Color(hex: "#15803D"),
+                 tags: [], idKey: "aus_india_test_syd", tiers: [
+                    TixTier("General Admission (Day 1)", idKey: "ga", price: 45, perks: "GA hill / bays"),
+                    TixTier("Reserved (Day 1)", idKey: "lower", price: 99, perks: "Reserved grandstand"),
+                    TixTier("Pavilion (Day 1)", idKey: "vip", price: 220, perks: "Members pavilion + dining")
+                 ]),
+        TixEvent(name: "HYROX Sydney", performer: "HYROX", category: .sports,
+                 venue: "Sydney Olympic Park", city: "Sydney", dateLabel: "Sat–Sun, 16–17 Aug · 8:00 AM",
+                 imageName: "TixHyrox", accent: Color(hex: "#0F172A"),
+                 tags: ["New"], idKey: "hyrox_syd", tiers: [
+                    TixTier("Spectator", idKey: "ga", price: 29, perks: "Watch all heats"),
+                    TixTier("Competitor — Single", idKey: "lower", price: 149, perks: "Race entry + timing chip"),
+                    TixTier("Competitor + Finisher Pack", idKey: "vip", price: 199, perks: "Entry + kit + finisher medal")
+                 ]),
+        TixEvent(name: "Monster Truck Mayhem", performer: "Monster Truck Mayhem Tour", category: .family,
+                 venue: "Accor Stadium", city: "Sydney", dateLabel: "Sat, 30 Aug · 6:00 PM",
+                 imageName: "TixMonsterTruck", accent: Color(hex: "#CA8A04"),
+                 tags: ["Few Left"], idKey: "monster_truck_syd", tiers: [
+                    TixTier("General Admission", idKey: "ga", price: 45, perks: "Grandstand seating"),
+                    TixTier("Pit Party Pass", idKey: "lower", price: 89, perks: "Pre-show pit access + seating"),
+                    TixTier("VIP Trackside", idKey: "vip", price: 159, perks: "Trackside + driver meet & greet")
                  ])
     ]
 }
