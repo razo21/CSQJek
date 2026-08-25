@@ -8,12 +8,11 @@ private let homeServices: [(name: String, imageName: String, icon: String, color
     ("CSQRide",        "IconRide",        "car.fill",               Color.csqRideBlue,     true),
     ("CSQMart",        "IconMart",        "cart.fill",              Color.csqMartGreen,    true),
     ("CSQFood",        "IconFood",        "fork.knife",             Color.csqFoodOrange,   true),
-    ("CSQDragonDance", "IconDragonDance", "figure.dance",           Color(hex: "#DC2626"), false),
+    ("CSQTix",         "IconTix",         "ticket.fill",            Color(hex: "#6D28D9"), true),
     ("CSQOutfits",     "IconOutfits",     "tshirt.fill",            Color(hex: "#9333EA"), false),
     ("CSQAir",         "IconAir",         "airplane",               Color(hex: "#1B3FAB"), true),
     ("CSQCash",        "IconCash",        "dollarsign.circle.fill", Color.csqWarning,      true),
     ("CSQMobile",      "IconMobile",      "simcard.fill",           Color.csqTelcoTeal,    true),
-    ("CSQTix",         "IconTix",         "ticket.fill",            Color(hex: "#6D28D9"), true),
 ]
 
 // MARK: - CS Accessibility ID Registry
