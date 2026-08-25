@@ -301,17 +301,17 @@ struct TixEventRow: View {
     let market: Market
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             ZStack {
                 if !event.imageName.isEmpty, let ui = UIImage(named: event.imageName) {
                     Image(uiImage: ui).resizable().scaledToFill()
                 } else {
                     LinearGradient(colors: [event.accent, event.accent.opacity(0.6)],
                                    startPoint: .topLeading, endPoint: .bottomTrailing)
-                    Image(systemName: event.category.icon).font(.system(size: 20)).foregroundColor(.white.opacity(0.3))
+                    Image(systemName: event.category.icon).font(.system(size: 24)).foregroundColor(.white.opacity(0.85))
                 }
             }
-            .frame(width: 60, height: 60)
+            .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 3) {
